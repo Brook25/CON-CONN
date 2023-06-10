@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+
+
+<style>
+
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+
+.content-table {
+	border-collapse: collapse;
+	margin: 25px 0;
+	font-size: 0.9em;
+	min-width: 400px;
+	border-radius: 5px 5px 0 0;
+	overflow: hidden;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: left;
+}
+
+.content-table th,
+.content-table td {
+  padding: 12px 15px;
+}
+
+
+.content-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.content-table tbody tr:nth-of-type(even) {
+	background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+	border-bottom: 2px solid #009879;
+}
+
+
+.content-table tbody tr:hover {
+  background-color: #ffff99;
+}
+
+
+.content-table .selected {
+  /*background-color: rgba(41, 103, 182, 0.89);*/
+  color: #ff0000;
+}
+
+.selected {
+  color: red;
+}
+
+.rev-rat {
+  display: flex;
+}
+
+.inner-rev-rat { 
+    flex: 1;
+    margin: 10px;
+}
+
+.inner-rev-rat:first-child {
+    margin-right: 20px;
+}
+
+/*.inner-span{
+
+}*/
+
+.stars{
+   align-items: center; 
+   float: left; 
+   border: none;
+}
+
+input {
+   display: none;
+}
+
+.supp-input {
+  display: block;
+}
+
+.stars > label {
+   display: block;
+   cursor: pointer;
+   width: 50px;
+   float: right;
+}
+
+
+.stars > label:before {
+   content: '\f005';
+   font-family: FontAwesome;
+   /*position: absolute;*/
+   margin: 5px;
+   cursor: pointer;
+   display: inline-block;
+   font-size: 1.5rem;
+   /*color: #101010;*/
+}
+
+/*.stars label:after {
+   content: '\f005';
+   font-family: FontAwesome;
+   position: relative;
+   display: block;
+   font-size: 50px;
+   color: #1f9cff;
+   top: 0;
+   opacity: 1;
+   transition: .5s;
+   text-shadow: 0 2px 5px rgba(0,0,0.0.5);
+}*/
+
+.stars > input:checked ~ label,
+.stars:not(:checked) > label:hover,
+.rating:not(:checked) > label:hover ~ label{
+  color: #2ce679;
+}
+
+
+.stars > input:checked + label:hover,
+.stars > input:checked ~ label:hover,
+.stars > label:hover ~ input:checked ~ label,
+.stars > input:checked ~ label:hover ~ label{
+  color: #2ddc76;
+}
+
+
+</style>
+	</head>
+	<body>
+		<div align="center">
+			<div class="close-btn">&times;</div>
+			    <div>
+			      <div>
+			      <div>
+			        <h4>
+				Book an Equipment supplier
+				</h4>
+			      </div>
+			      <div>
+				 <table class="content-table" id="table">
+				<thead>
+				<tr>
+				<th>username </th>
+				<th>location </th>
+				<th>Mahine name </th>
+				<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for row in history %}
+				<tr>
+				<td>{{row.username}}</td>
+				<td>{{row.location}}</td>
+				<td>{{row.name}}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+
+		</div>
+			      </div>
+			    </div>
+		</div>
+	<div class="modal" id="modal">
+        	<div class="modal-content">
+			{%if 'review' in request.path %}
+			<div>
+			<span><h2 align="center"><i>Input Review and Rating</i></h2></span>
+			</div>
+			<form action="{{url_for('views.access_api', end_point='review')}}"method="POST">
+			<div class="rev-rat">
+			<div class="inner-rev-rat">
+			<span class="inner-span"><h4>Add review</h4></span>
+			<textarea class="rev-input" name="rev-input" value="" style="width: 360px; height: 150px; border-radius: 5px; border-color: #00FFFF;" maxlength="150"></textarea>
+			</div>
+      <div class="inner-rev-rat">	
+	<fieldset class="stars">	
+	<span class="inner-span"><h4 align="center">Input Rating</h4></span>
+	<input type="radio" name="rate" id="rate-5" value=5>
+	<label for="rate-5" class="full"></label>
+	<input type="radio" name="rate" id="rate-4" value=4>
+        <label for="rate-4" class="full"></label>
+        <input type="radio" name="rate" id="rate-3" value=3>
+        <label for="rate-3" class="full"></label>
+        <input type="radio" name="rate" id="rate-2" value=2>
+        <label for="rate-2" class="full"></label>
+        <input type="radio" name="rate" id="rate-1" value=1>
+        <label for="rate-1" class="full"></label>
+	</fieldset>
+        </div>
+	<div>
+	<input class="supp-input" type="text" id="supp" name="supp" value=""/>
+	</div>
+	</div>
+			<button type="submit" class="btn btn-primary">Submit</button>
+			</form>
+			{% else %}
+			<div>
+                        <span><h2 align="center"><i>Input Complaints</i></h2></span>
+                        </div>
+			<form>
+			 <textarea class="rev-input" name="rev-input" value="" style="width: 360px; height: 150px; border-radius: 5px; border-color: #00FFFF;" maxlength="150"></textarea>	
+			<button type="submit" class="btn btn-primary">Submit</button>
+ 			</form>
+			{% endif %}
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<script>
+
+                let table = document.getElementById('table');
+		//let inputElem = document.getElementById("booksupplier");
+		let modal = document.getElementById('modal');
+		let supp_input = document.getElementById('supp');
+		for(let i = 1; i < table.rows.length; i++)
+                  {
+                    table.rows[i].onclick = function()
+                      {
+			      modal.style.display = "block";
+			      supp_input.value = this.cells[0].innerHTML + ':' + this.cells[1].innerHTML + ':' + this.cells[2].innerHTML;
+		      }
+                      };
+
+   
+
+		$("tbody tr").click(function() {
+   $(this).addClass('selected').siblings().removeClass('selected');
+        console.log('selected');
+});
+        	</script>
+
+	</body>
+</html>

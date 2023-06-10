@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="{{ request.path }}" method="POST", class="...">
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, messages in messages %}
+<div class="alert alert-{{category}} alert-dismissable fade show" role="alert">
+{{  message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% if request.path == '/sign-up/' %}
+<h3 align="center">Sign Up</h3>
+<div class="form-group">
+  <label for="username">User Name</label>
+{{ form.username(class_="form-control", placeholder="username") }}
+{% for error in form.username.errors %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ error }}
+<button type="button" class="close" data-bs-dismiss="alert">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+{% endif %}
+<div class="form-group">
+  <label for="email">Email Address</label>
+{{ form.email(class_="form-control", placeholder="email") }}
+{% for error in form.email.errors %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+{{ error }}
+<button type="button" class="close" data-bs-dismiss="alert">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+</div>
+<div class="form-group">
+  <label for="password">Password</label>
+{{ form.password(class_="form-control", placeholder="password") }}
+{% for error in form.password.errors %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+{{ error }}
+<button type="button" class="close" data-bs-dismiss="alert">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+{% if request.path == '/sign-up/' %}
+<div class="form-group">
+  <label for="password">Confirm (Password)</label>
+{{ form.cpwd(class_="form-control", placeholder="confirm password") }}
+{% for error in form.cpwd.errors %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+{{ error }}
+<button type="button" class="close" data-bs-dismiss="alert">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+{% endif %}</br>
+<button type="submit" class="btn btn-primary">Submit</button>
+<p align="center">
+{% if request.path != '/sign-up/' %}
+New here?
+<a href={{url_for('auth.sign_up')}}>Create account</a>
+{% else %}
+Already have an account?</br>
+<a href={{url_for('auth.login')}} style="color:#8b0000;">Login</a>
+{% endif %}
+</p>
+{% endblock %}
+

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+
+
+</head>
+
+
+
+<body>
+<form method="POST">
+                <!--<input type="text" id="locationinput" value="none"/>-->
+        <div align="center">
+            <h1 align="center">Book an Equipment</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Select City</label>
+                    <select name="city" data-live-search="true" id="city" class="form-control" title="Select city" align="center" onchange="updateCity()">
+                    {% for k in cities %}
+                    <option value="{{k}}">{{k}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Select Sub-city</label>
+                    <select name="sub-city" data-live-search="true" id="sub-city" class="form-control" title="Select sub-city" align="center" onchange="updateSubcity()"> </select>
+
+                </div>
+                <div class="col-md-6">
+                    <label>Select Location</label>
+                    <select name="location" data-live-search="true" id="location" class="form-control" title="Select location" align="center" onchange="updateLocation()"> </select>
+
+                </div>
+
+                <div class="col-md-6">
+                    <label>Select Equipment</label>
+                    <select name="equipment" data-live-search="true" id="equipment" class="form-control" title="Select equipment" align="center" multiple>
+                            {% for v in equipments %}
+                            <option value={{v}}>{{v}}</option>
+                            {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label> Select minimum rating </label>
+		       <select name="rating" data-live-search="true" id="rating" class="form-control" title="Select rating">
+                            {% for i in range(5) %}
+                            {%if i > 0 %}
+                            <option value={{i}}>{{i}}</option>
+                            {% endif %}
+                            {% endfor %}
+                    </select>
+                    </div>
+                    <br />
+                     <div>
+                             <label>Append number of equipments after selection</label>
+                       <input type="hidden" id="cityinput"/>                <input type="hidden" id="subcityinput" value="none"/>
+                <input type="hidden" id="locationinput" value="none"/>
+                     <input type="text" id="equipmentinput" value="none" placeholder="Append amount for each equipment after a space after selection"/>
+                     </div>
+
+                   <div style="position:absolute; left:650px; top:280px;" align="center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+                <!--<input type="submit" value="Submit" name="Submit"/>-->
+        </form>
+         <script>
+        function updateCity() {
+          var val = document.getElementById("city").value
+          document.getElementById("cityinput").value = val;
+        }
+
+        function updateSubcity() {
+          var val = document.getElementById("sub-city").value
+                const res = val.split("/");
+                document.getElementById("subcityinput").value = res[1];
+        }
+
+        function updateLocation() {
+          let val = document.getElementById("location").value
+          document.getElementById("locationinput").value = val;
+        }
+
+        var select = document.getElementById("equipment");
+        var input = document.getElementById("equipmentinput");
+        select.addEventListener("change", function(event) {
+            const selected = document.querySelectorAll('#equipment option:checked');
+            const values = Array.from(selected).map(el => el.value);
+            input.value = values.join(', ');
+        })
+
+        </script>
+	 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#city").selectpicker();
+
+                $("#sub-city").selectpicker();
+
+                $("#location").selectpicker();
+
+                $("#equipment").selectpicker();
+
+                //$("#city-div").selectpicker();
+
+                //$("#sub-city-div").selectpicker();
+
+
+
+                function load_data(url, type, place) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        data: { type: type, place: place },
+                        dataType: "json",
+                        success: function (res) { //alert(category_id)
+                            var html = "";
+                            for (var count = 0; count < res.length; count++) {
+
+                                if (type == "subcityData")
+                                html += '<option value="' + place + '/' + res[count] + '">' + res[count] + "</option>";
+                                else
+                                html += '<option value="' + res[count] + '">' + res[count] + "</option>";
+                            }
+                            if (type == "cityData") {
+                               $("#city").html(html);
+                                $("#city").selectpicker("refresh");
+                            } if (type == "subcityData") {
+                                $("#sub-city").html(html);
+                                $("#sub-city").selectpicker("refresh");
+                            }
+                              if (type == "locationData") {
+                                $("#location").html(html);
+                                $("#location").selectpicker("refresh");
+                            }
+                        },
+                    });
+		}
+		
+                $(document).on("change", "#city", function () {
+                   var city_name = $("#city").val();
+                   //let html = '<input type="' + 'text" ' + 'name="' + 'city-input" ' + 'id="' + 'city-input" ' + 'value="' + city_name + '"/>'
+                   load_data('/city', "subcityData", city_name);
+                   //$("#city-div").html(html);
+                   //$("#city-div").selectpicker("refresh");
+                });
+                $(document).on("change", "#sub-city", function () {
+                    var subcity_name = $("#sub-city").val();
+                    load_data('/sub-city', "locationData", subcity_name);
+                });
+
+
+            });
+        </script>
+
+</body>
+</html>
+
