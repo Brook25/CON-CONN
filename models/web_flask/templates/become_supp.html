@@ -7,6 +7,18 @@
          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
+<style>
+
+.container {
+position: relative;
+top: 75px;
+}
+
+
+</style>
+
+
+
 
 </head>
 
@@ -15,7 +27,7 @@
 <body>
 <form method="POST">
                 <!--<input type="text" id="locationinput" value="none"/>-->
-        <div align="center">
+        <div class="container" align="center">
 	   <h1 align="center">Become a {{items[0]}} Supplier</h1>
             <div class="row">
                 <div class="col-md-6">
@@ -39,7 +51,7 @@
 
 		<div class="col-md-6">
 			<label>Select {{ items[0] }} 1</label>
-                    <select name="equipment1" data-live-search="true" id="equipment1" class="form-control" title="Select equipment" align="center" multiple>
+                    <select name="it1" data-live-search="true" id="equipment1" class="form-control" title="Select equipment" align="center">
                             {% for v in items[1] %}
                             <option value={{v}}>{{v}}</option>
                             {% endfor %}
@@ -47,7 +59,7 @@
 		</div>
 		 <div class="col-md-6">
 			 <label>Select {{ items[0] }} 2</label>
-                    <select name="eq2" data-live-search="true" id="eq2" class="form-control" title="Select equipment" align="center" multiple>
+                    <select name="it2" data-live-search="true" id="eq2" class="form-control" title="Select equipment" align="center">
                             {% for v in items[1] %}
                             <option value={{v}}>{{v}}</option>
                             {% endfor %}
@@ -55,7 +67,7 @@
                 </div>
 		 <div class="col-md-6">
 			 <label>Select {{ items[0] }} 3</label>
-                    <select name="equip3" data-live-search="true" id="equip3" class="form-control" title="Select equipment" align="center" multiple>
+                    <select name="it3" data-live-search="true" id="equip3" class="form-control" title="Select equipment" align="center">
                             {% for v in items[1] %}
                             <option value={{v}}>{{v}}</option>
                             {% endfor %}
@@ -66,33 +78,32 @@
 		{% if i > 0 %}
 			<div style="display: inline-block;  margin-left: 30px; margin-right: 30px;">
 			<div>
-				<label>For Equipment {{i}}</label>
+				<label>For {{ items[0] }} {{i}}</label>
 			</div>
+			{% if items[0][0] == 'E' %}
 			<div>
 			<label>Input number of years used</label>
 			</div>
-			<input name="eq1yused" id="eq1yused"/>
+			<input name="it{{i}}-yused" id="item{{i}}yused"/>
+			{% endif %}
 			<div>
 			<label>price in Birr</label>
 			</div>
-                    <input name="eq1price" id="eq1price"/>
+			<input name="it{{i}}-price" id="item{{i}}price"/>
 			</div>
 		{% endif %} 
 		{% endfor %}
 		</div><br />
+		{% if 'new' in request.path %}
 		<div style="margin-top: 100px;">
 		<div>
 		<label>Contact Info (phone no)</label>
 		</div>
-		<input name="eq1price" id="eq1price" value="none"/>
+		<input name="contactinfo" id="eq1price" value="none"/>
 		</div>
+		{% endif %}
 		<div>
                        <input type="hidden" id="cityinput"/>                <input type="hidden" id="subcityinput" value="none"/>
-		 {% if items[0][0] == 'E' %}
-		 <input type="hidden" name="item" value="E"/>
-		 {% else %}
-		 <input type="hidden" name="item" value="M"/>
-		{% endif %}
                 <input type="hidden" id="locationinput" value="none"/>
 		<input type="hidden" id="equipmentinput1" value="none"/>
 		   

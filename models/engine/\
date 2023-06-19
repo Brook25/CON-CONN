@@ -37,7 +37,8 @@ class DBEngine:
        raise ValueError("collection name not provided or document name lacking")
        '''
     @staticmethod
-    def equipment_count(*args):
+    def equipment_count(self, *args):
+        print(args)
         it_lst = list(set(map(lambda x: x['machine'], args[0])))
         if len(args) < 2:
             count = [0 for it in it_lst]
@@ -45,8 +46,8 @@ class DBEngine:
             count = list(map(lambda x: len(args[1].items.filter(machine=x)), it_lst))
         count_dct = dict(zip(it_lst, count))
         for it in args[0]:
-           it['name'] += str(count_dct[it['machine']] + 1)
-           count_dct[it['machine']] += 1
+            it['name'] += str(count_dct[it['machine']] + 1)
+            count_dct[it['machine']] += 1
 
         
 
@@ -59,27 +60,25 @@ class DBEngine:
             if loc:
                 if dct['coll'][0] == "E":
                     self.equipment_count(dct['append'], loc)
-                    Equipment.append(dct)
+                    print(dct['append'])
+                    #Equipment.append(dct)
                 else:
-                    filter = [loc.items.filter(name=x['name']).first() for x in dct['append']]
-                    names = [x['name'] for x in filter if x]
-                    dct['append'] = [x for x in dct['append'] if x['name'] not in names]
                     Material.append(dct)
             else:
                 if dct['coll'][0] == "E":
-                    self.equipment_count(dct['append'])
+                    equipment_count(dct['append'])
                 Location.append(dct)
         else:
             if dct['coll'][0] == "E":
-                self.equipment_count(dct['append'])
+                equipment_count(dct['append'])
                 eq = [Equipment(**(eq)) for eq in dct['append']]
                 loc = Location(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=eq)
-                dct = {'username': dct['username'], 'locations': [loc], 'contact_info': [dct['contact_info']]}
+                dct = {'username': dct['username'], 'locations': [loc]}
                 self.add_new({'coll': 'EquipmentSuppliers', 'docs': dct})
             else:
                 mt = [Material(**(eq)) for eq in dct['append']]
-                loc = Location(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=mt)
-                dct = {'username': dct['username'], 'locations': [loc], 'contact_info': [dct['contact_info']] }
+                loc = Location(name=dct['name'], city=dct['city'], sub_city=dct['sub_city'], materials=mt)
+                dct = {'username': dct['username'], 'locations': [loc]}
                 self.add_new({'coll': 'MaterialSuppliers', 'docs': dct})
 
 
@@ -111,7 +110,7 @@ class DBEngine:
         print(coll)
         update = dct['update1']
         if len(dct) < 4:
-            coll.update_one(row, update, upsert=False)
+            coll.update_one(row, update)
         else:
             array_filters = dct['array_filters']
             print(row, update, array_filters)
@@ -143,12 +142,14 @@ class DBEngine:
 
 
     def feed_history(self, username):
+#        pass
         eq_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$equipment_bookings"}, {"$match": {"equipment_bookings.return_date": {"$gt": datetime.utcnow()} } }, {"$project": {"equipment_bookings": 1, "_id": 0} }] })
-        mt_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$material_bookings"}, {"$match": {"material_bookings.return_date": {"$gt": datetime.utcnow()} } }, {"$project": {"material_bookings": 1, "_id": 0} }] })
-        history = list(map(lambda x: x['equipment_bookings'], eq_history)) + list(map(lambda x: x['material_bookings'], mt_history))
-        history = sorted(history, key=lambda x: x['date'])
-        self.update({'coll': 'User', 'row': {'username': username},
-            'update1': {'$push': {"history": {"$each": history} } } })
+        sorted_lst = sorted(eq_history, key=lambda x: x['equipment_bookings']['date'])
+        dates = list(map(lambda x: x['equipment_bookings'], eq_history))
+        return dates
+        #coll = classes['User']._get_collection()
+        #coll.insert_one({"history": []})
+        #self.update(
 
 
         #for doc in eq_history:

@@ -11,4 +11,5 @@ class Booking(EmbeddedDocument):
     date = DateTimeField(default=datetime.datetime.utcnow)
     return_date = DateTimeField(required=True)
     location = StringField(required=True)
+    item = StringField(required=True)
     name = StringField(required=True)

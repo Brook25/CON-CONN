@@ -114,6 +114,7 @@
 			      </div>
 			    </div>
 		</div>
+	{% if 'review' in request.path %}
 	<div class="modal" id="modal">
         	<div class="modal-content">
         	<div id="review-title">
@@ -123,12 +124,22 @@
         	</div>
         	</div>
         </div>
+	{% else %}
+	<div>
+	<div>
+	<input/>
+	</div>
+	<div>
+	<button>Submit</button>
+	</div>
+	</div>
+	{% endif %}
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 		<script>
 
-		async function get_reviews(url, data) {
+		/*async function get_reviews(url, data) {
 			let uname = data.uname;
 			let loc = data.loc;
 			let name = data.name;
@@ -146,7 +157,7 @@
 				html = '<span>' + '<h3>@' + elem['name'] + ' said: ' +  '<i>"' +  elem['review'] + '"</i>' + '</h3>' + '</span>';
 			  review_div.innerHTML += html;
 			});
-		}
+		}*/
 
 
 
@@ -158,14 +169,30 @@
                   {
                     table.rows[i].onclick = function()
                       {
-			      modal.style.display = "block";
-			      let uname = {{ data[0] | tojson }};
-			      let loc = {{ data[1] | tojson }};
-			      let machine_name = this.cells[1].innerHTML;
-			
-			      let data = { "uname": uname, "loc": loc, "name": machine_name }
-			      console.log( typeof uname, loc, machine_name)
-			      get_reviews("http://127.0.0.1:5001/reviews/equipments", data);
+			 if ( {{ request.path | tojson }}.includes('review') ) {
+			   let uname = {{ data[0] | tojson }};
+			   let loc = {{ data[1] | tojson }};
+			   let machine_name = this.cells[1].innerHTML;
+			   let items = JSON.parse('{{ items | tojson }}')
+			   let review_div = document.getElementById("reviews");
+			   let val = items.find((elem) => elem['name'] === machine_name);
+			   val['reviews'].map((elem) => {
+                           html = '<span>' + '<h3>@' + elem['username'] + ' said: ' +  '<i>"' +  elem['review'] + '"</i>' + '</h3>' + '</span>';
+                          review_div.innerHTML += html;
+                        });
+			   modal.style.display = "block";
+		      }
+
+			else {
+			  
+
+
+
+			}
+
+			      //let data = { "uname": uname, "loc": loc, "name": machine_name }
+			      //console.log( typeof uname, loc, machine_name)
+			      //get_reviews("http://127.0.0.1:5001/reviews/equipments", data);
 		      }
 			/*document.getElementById("booksupplier").value = this.cells[2].innerHTML;*/
                       };

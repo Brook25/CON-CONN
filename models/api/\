@@ -217,12 +217,15 @@ def access_api(end_point):
         else:
             res = requests.get(url + "item/material",
                     params={'user': user, 'locations': req[2]}).json()
+            #items = json.loads(res)[0].get('locations')[0].get('equipments')
         if 'review' in req:
-            return render_template('review.html', items=json.loads(res), data=(user, req[2]))
+            print(res)
+            return "Done"
+            return render_template('review.html', items=items, data=(user, req[2]))
         if 'Change' in req[1]:
             return render_template('update_or_review.html', cities=cities, items=items, data=(user, req[2]))
-        if 'remove' in req[1]:
-            return render_template('review.html', items=json.loads(res), data=(user, req[2]))
+        return "Done"
+        #return render_template('update_or_review.html', items=items)
     
     if end_point == 'review':
         res = requests.get(url + f'history/{user}')

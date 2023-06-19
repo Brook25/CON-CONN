@@ -7,6 +7,16 @@
          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
+<style>
+
+.container {
+position: relative;
+top: 100px;
+}
+
+
+</style>
+
 
 </head>
 
@@ -15,7 +25,7 @@
 <body>
 <form method="POST">
                 <!--<input type="text" id="locationinput" value="none"/>-->
-        <div align="center">
+        <div class="container" align="center" >
             <h1 align="center">Book an Equipment</h1>
             <div class="row">
                 <div class="col-md-6">
@@ -39,22 +49,13 @@
 
                 <div class="col-md-6">
 			<label>Select {{ items[0] }}</label>
-                    <select name="equipment" data-live-search="true" id="equipment" class="form-control" title="Select equipment" align="center" multiple>
+                    <select data-live-search="true" id="equipment" class="form-control" title="Select equipment" align="center" multiple>
                             {% for v in items[1] %}
                             <option value={{v}}>{{v}}</option>
                             {% endfor %}
 		    </select>
 		</div>
-		<div class="col-md-6">
-		    <label> Select minimum rating </label>
-		    <select name="rating" data-live-search="true" id="rating" class="form-control" title="Select rating" onchange="updaterating()">
-                            {% for i in range(5) %}
-			    {%if i > 0 %}
-                            <option value={{i}}>{{i}}</option>
-			    {% endif %}
-                            {% endfor %}
-                    </select>
-		    </div>
+		    {% if 'equip' in request.path %}
 		    <div class="col-md-6">
 			 <label> Select no of days </label> 
 			<select name="days" data-live-search="true" id="days" class="form-control" title="Select rating" onchange="updatedays()">
@@ -65,18 +66,13 @@
                             {% endfor %}
                     </select>
 
-		    </div>	    
+		    </div>
+		    {% endif %}
 		    <br />
                      <div>
-			     <label>Append number of equipments after selection</label>
                        <input type="text" id="cityinput"/>                <input type="text" id="subcityinput" value="none"/>
-		 {% if items[0][0] == 'E' %}
-		 <input type="text" name="item" value="E"/>
-		 {% else %}
-		 <input type="text" name="item" value="M"/>
-		{% endif %}
                 <input type="text" id="locationinput" value="none"/>
-		<input type="text" id="equipmentinput" value="none"/>
+		<input type="text" name="equipment" id="equipmentinput" value="none"/>
 		    <input type="text" id="daysinput" value="1"/>
 		    <input type="text" id="ratinginput" value="1"/>
 		     </div>
@@ -144,7 +140,6 @@
 
                 $("#days").selectpicker();
 
-                $("#rating").selectpicker();
 
 
 

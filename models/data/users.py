@@ -14,7 +14,7 @@ class User(mongoengine.Document, UserMixin):
     complaints = mongoengine.EmbeddedDocumentListField(Complaint)
     complaints_against = mongoengine.EmbeddedDocumentListField(Complaint)
     notifications = mongoengine.DictField(default={"num": 0, "notes": []})
-    
+    history = mongoengine.EmbeddedDocumentListField(Booking) 
     meta = {"db_alias": "cnn",
             "collection": "users"
             }

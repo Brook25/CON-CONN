@@ -71,7 +71,7 @@
 				<tr>
 				<th>User name </th>
 				<th>Name </th>
-				{% if query[0].locations['items'].get('machine')  %}
+				{% if query[0].supp.locations['items'].get('machine')  %}
 				<th>Machine </th>
 				<th>Years used </th>
 				{% endif %}
@@ -83,12 +83,12 @@
 				{% for supp in query %}
 				<tr>
 				<td>{{supp.username}}</td>
-				<td>{{supp.locations['items']['name']}}</td>
+				<td>{{supp.locations.items.name}}</td>
 				{% if supp.locations['items'].get('machine')  %}
 				<td>{{ supp.locations.items.machine }}</td>
-				<td>{{supp.locations['items']['years_used']}}</td>
+				<td>{{supp.locations.items.years_used}}</td>
 				{% endif %}
-				<td>{{supp.locations['items']['rating']}}</td>
+				<td>{{supp.locations.items.rating}}</td>
 				<td>{{supp.contact_info}}</td>
 				</tr>
 				{% endfor %}
@@ -113,7 +113,7 @@
                   {
                     table.rows[i].onclick = function()
                       {
-			let val = this.cells[0].innerHTML + '-' + this.cells[1].innerHTML + ', ';
+			let val = this.cells[0].innerHTML + '-' + this.cells[2].innerHTML + ', ';
 			      if (inputElem.value.includes(val)) {
 				inputElem.value = inputElem.value.replace(val, "");
 				console.log(inputElem.value, val);

@@ -1,8 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" /> 
 
 <style>
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+  height: 55%;
+}
 
 
 .content-table {
@@ -53,13 +79,20 @@
 }
 
 
+#btn1 {
+position: relative;
+top: 20px;
+left: 40%;
+}
+
+
 </style>
 	</head>
 	<body>
-		<div class="modal" align="center">
+		<div align="center">
 			<div class="close-btn">&times;</div>
 			    <div class="modal-dialog">
-			      <div class="modal-content">
+			      <div>
 			      <div class="modal-header">
 			        <h4 class="modal-title">
 				Book an Equipment supplier
@@ -69,10 +102,10 @@
 				 <table class="content-table" id="table">
 				<thead>
 				<tr>
-				<th>Machine </th>
-				<th>Name </th>
-				<th>Years used </th>
-				<th>Rating </th>
+				<th>Machine</th>
+				<th>Name</th>
+				<th>Years used</th>
+				<th>Rating</th>
 				</tr>
 				</thead>
 				<tbody>
@@ -86,38 +119,162 @@
 				{% endfor %}
 				</tbody>
 			</table>
-			<form method="POST">
-			<input type="text" id="booksupplier" name="supp" value=""/>
-			<input type="text" id="booksupplier" name="supp" value="{{location}}"/>
-			<button type="submit" class="btn btn-primary" align="center">Submit</button>
-			</form>
-
 		</div>
 			      </div>
 			    </div>
 		</div>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+                 <form method="POST">
+		{% if 'location' not in request.args.get('loc') %}
+		<input type="text" id="data" name="data" value=""/>
+		{% endif %}
+		{% if 'Change_availability' not in request.args.get('loc')%}
+		 <div class="modal">
+			 <div class="modal-content">
+			{% if 'Change_Price' in request.args.get('loc') %}
+			<div align="center"><h4>Input new price</h4></div>
+			<div align="center">
+                        <input type="text" id="input-data" name="input" value=""/>
+			</div>
+			{% elif 'Change_location' in request.args.get('loc') %}
+			<div align="center">
+            <h1 align="center">Become A Supplier</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Select City</label>
+                    <select name="city" data-live-search="true" id="city" class="form-control" title="Select city" align="center">
+                    {% for k in cities %}
+                    <option value="{{k}}">{{k}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Select Sub-city</label>
+                    <select name="sub-city" data-live-search="true" id="sub-city" class="form-control" title="Select sub-city" align="center"> </select>
+
+                </div>
+                <div class="col-md-6">
+                    <label>Select Location</label>
+                    <select name="location" data-live-search="true" id="location" class="form-control" title="Select location" align="center" onchange="updateLocation()"> </select>
+
+                </div>
+		<input type="text" id="input-data" name="input" value=""/>
+	    </div>
+			</div>
+			{% endif %}
+	    <button type="submit" class="btn btn-primary" id="btn1">Submit</button>
+			</div>
+		</div>
+		{% else %}
+		<button type="submit" class="btn btn-primary" id="btn1">Submit</button>
+		{% endif %}
+		 </form>
+			<div>
+			</div>
+                        </div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+	{% if 'Change_location' in request.args.get('loc') %}
+	<script> 
+
+        function updateLocation() {
+          let loc = document.getElementById("location").value;
+	  let sub_city = document.getElementById("sub-city").value.split('/')[1];
+	  let city = document.getElementById("city").value;
+	  let val = city + '/' + sub_city + '/' + loc;
+	  console.log(val);
+          document.getElementById("input-data").value += val;
+        }
+	
+	$(document).ready(function () {
+                $("#city").selectpicker();
+
+                $("#sub-city").selectpicker();
+
+                $("#location").selectpicker();
+
+                $("#equipment").selectpicker();
+
+
+                function load_data(url, type, place) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        data: { type: type, place: place },
+                        dataType: "json",
+                        success: function (res) { //alert(category_id)
+                            var html = "";
+                            for (var count = 0; count < res.length; count++) {
+
+                                if (type == "subcityData")
+                                html += '<option value="' + place + '/' + res[count] + '">' + res[count] + "</option>";
+                                else
+                                html += '<option value="' + res[count] + '">' + res[count] + "</option>";
+                            }
+                            if (type == "cityData") {
+                               $("#city").html(html);
+                                $("#city").selectpicker("refresh");
+                            } if (type == "subcityData") {
+                                $("#sub-city").html(html);
+                                $("#sub-city").selectpicker("refresh");
+                            }
+                              if (type == "locationData") {
+                                $("#location").html(html);
+                                $("#location").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#city", function () {
+                   var city_name = $("#city").val();
+                   load_data('/city', "subcityData", city_name);
+		});
+
+		$(document).on("change", "#sub-city", function () {
+                    var subcity_name = $("#sub-city").val();
+                    load_data('/sub-city', "locationData", subcity_name);
+                });
+
+
+            });
+
+
+	</script>
+	{% endif %}
 		<script>
                 let table = document.getElementById('table');
-		let inputElem = document.getElementById("booksupplier");
+		let inputElem;
+		if (document.getElementById('data'))
+		  inputElem = document.getElementById("data");
+		else
+		  inputElem = document.getElementById('input-data');
+		let end_point = {{ request.args.get('loc') | tojson }};
+		console.log(inputElem, '{{ request.args.get("loc") }}');
                 for(let i = 1; i < table.rows.length; i++)
                   {
                     table.rows[i].onclick = function()
                       {
-			let val = this.cells[0].innerHTML + '-' + this.cells[2].innerHTML + ', ';
-			      if (inputElem.value.includes(val)) {
-				inputElem.value = inputElem.value.replace(val, "");
-				console.log(inputElem.value, val);
-			      }
-			      else {
-				inputElem.value += val;
-			    }
-			/*document.getElementById("booksupplier").value = this.cells[2].innerHTML;*/
-                      };
+			let val = this.cells[1].innerHTML + ':';
+			//console.log(val);
+			if (end_point.includes('Price') || end_point.includes('location'))
+			  inputElem.value = val;
+			else {
+			  console.log(inputElem.value);
+			  if (inputElem.value.includes(val))
+			    inputElem.value = inputElem.value.replace(val, "");
+			  else
+			    inputElem.value += val;
+			}
+			if (!(end_point.includes('availability')))
+			  document.getElementsByClassName("modal")[0].style.display = "block";
+		      };
                   }
-
-   
+		</script>
+   		{% if 'availability' in request.args.get('loc') %}
+		<script>
 		$("tbody tr").click(function() {
 		  if ($(this).hasClass('selected')) {
 			$(this).removeClass('selected');
@@ -127,12 +284,15 @@
 		    $(this).addClass('selected');
 		  }
 		});
-
-		/*$("tbody tr").click(function() {
-   $(this).addClass('selected').siblings().removeClass('selected');
-        console.log('selected');
-});*/
+		</script>
+		{% else %}
+		<script>
+		$("tbody tr").click(function() {
+   		$(this).addClass('selected').siblings().removeClass('selected');
+        	console.log('selected');
+		});
         	</script>
+		{% endif %}
 
 	</body>
 </html>

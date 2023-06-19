@@ -1,10 +1,14 @@
 import mongoengine
+from .materials import Material
 
-class Equipment(mongoengine.EmbeddedDocument):
+class Equipment(Material):
     machine = mongoengine.StringField(required=True)
-    name = mongoengine.StringField(required=True)
-    available = mongoengine.BooleanField(default=True)
     years_used = mongoengine.IntField()
-    price = mongoengine.IntField(required=True)
-    reviews = mongoengine.ListField(mongoengine.DictField)
-    rating = mongoengine.IntField(default=2)
+
+    @classmethod
+    def append(self, dct):
+        equipments = [Equipment(**(eq)) for eq in dct['append']]
+        loc = dct['username'].locations.filter(**(dct['filter'])).first()
+        print(loc, loc.to_mongo())
+        [loc.items.append(eq) for eq in equipments]
+        dct['username'].save()

@@ -68,6 +68,10 @@ body {
   transform: scale(1.03);
 }
 
+#update-modal {
+display: none;
+}
+
 
 .sidebar {
   position: absolute;
@@ -180,6 +184,17 @@ margin-left: 15px;
   width: 80%;
 }
 
+
+.update-item {
+font-size: 17px;
+cursor: pointer;
+}
+
+.update-item:hover {
+background-color: CadetBlue;
+color: chocolate;
+}
+
 /* The Close Button */
 .close {
   color: #aaaaaa;
@@ -213,6 +228,7 @@ h1{
 }
 
 .not {
+  display: none;
   background: #F00;
   position: absolute;
   line-height: 30px;
@@ -319,44 +335,31 @@ color: red;
 	 <nav class="nav1">
                   <ul class="nav_links">
 			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
-			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">3</span></a>
+			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
 			</li>
 			<li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
                   </ul>
 	 </nav><br /><br />
- 	<!-- <nav>
-                  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
-            <span class="navbar-toggler-icon"></span>
-                  </button>
-                  <div class="collapse navbar-collapse" id="navbar">
-                          <div>
-                            <a class="nav-item nav-link" id="login" href="/login">Login</a>
-                            <a class="nav-item nav-link" id="signUp" href="/sign-up">Sign Up</a>
-                            <a class="nav-item nav-link" id=logout" href="/logout">Logout</a>
-                            <a class="nav-item nav-link" id="home" href="/">Home</a>
-                          </div>
-                  </div>
-		  </nav>-->
 
 	<div class="wrapper">
 		  <h1 align="center">Our Services</h1>
 		<div class="flex-container">
 		    <div class="flex-box">
                         <h3>Book an equipment</h3>
-			<a href="{{ url_for('views.book', item='equip')}}" class="btn">readmore</a>
+			<a href="{{ url_for('views.book', item='equipment')}}" class="btn">readmore</a>
                     </div>
 
 		    <div class="flex-box">
 			<h3>Book a material</h3>
-			<a href="{{ url_for('views.book', item='mat') }}" class="btn">readmore</a>
+			<a href="{{ url_for('views.book', item='material') }}" class="btn">readmore</a>
 		    </div>
 		     <div class="flex-box">
                         <h3>Become a material supplier</h3>
-                        <a href="#" class="btn">readmore</a>
+                        <a href="{{ url_for('views.register', type='new', item='material')}}" class="btn">ieadmore</a>
                     </div>
 		    <div class="flex-box">
                         <h3>Become an Equipment supplier</h3>
-			<a href="{{ url_for('views.become_supp', item='equip_supp')}}" class="btn">readmore</a>
+			<a href="{{ url_for('views.register', type='new', item='equipment')}}" class="btn">readmore</a>
                     </div>
 		     <div class="flex-box">
                         <h3>Review and add ratings</h3>
@@ -384,15 +387,15 @@ color: red;
                     </div>
                     <div class="flex-box">
                         <h3>Add Material(s)</h3>
-                        <a href="#" class="btn">readmore</a>
+			<a href="{{ url_for('views.register', type='add', item='material') }}" class="btn">readmore</a>
                     </div>
                      <div class="flex-box">
                         <h3>Update </h3>
-                        <a href="#" class="btn">readmore</a>
+                        <a id="update" href="#" class="btn">readmore</a>
                     </div>
                      <div class="flex-box">
-                        <h3>Rules and Reglations</h3>
-                        <a href="#" class="btn">readmore</a>
+                        <h3>Add Equipment(s)</h3>
+                        <a href="{{ url_for('views.register', type='add', item='equipment') }}" class="btn">readmore</a>
                     </div>
 
 	</div>
@@ -485,6 +488,14 @@ color: red;
 
 	 </div>
 
+	<div class="modal1" id="update-modal">
+	<div class="modal1-content">
+	<div><h4 align="center">Pick an option to update</h4></div>
+	<div class="update-item">Change Price</div>
+	<div class="update-item">Change availability</div>
+	<div class="update-item">Change location</div>
+	</div>
+	</div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -541,7 +552,8 @@ color: red;
 				      $("#eq-item").append(html) });
 
 			      res['m'].map((elem) => { console.log(elem);
-				      let html = '<a href="{{url_for("views.access_api", end_point="loc", loc="mt:' + elem + '")}}"><h4>' + elem + '</h4></a>'
+				      let val = 'mt:' + type +':' + elem;
+				      let html = '<a href="{{url_for("views.access_api", end_point="loc", loc="arg")}}"><h4>'.replace("arg", val) + elem + '</h4></a>';
 				      $("#mt-item").append(html) } );
 			       }
 			      });
@@ -549,38 +561,64 @@ color: red;
 		
 		  $(document).on("click", "#remove", function () {
 		  //let modal1 = getElementById("item-modal");
-		  get_data("http://127.0.0.1:5001/locations/all", 'remove');
+			  get_data("http://127.0.0.1:5001/locations/all?uname={{uname}}", 'remove');
 		  $("#item-modal").css("display", "block");			
 		});
 		
 		$(document).on("click", "#reviews", function () {
                   //let modal1 = getElementById("item-modal");
-                  get_data("http://127.0.0.1:5001/locations/all", 'review');
+			get_data("http://127.0.0.1:5001/locations/all?uname={{uname}}", 'review');
                   $("#item-modal").css("display", "block");
                 });
+		 
+	
+	 $(document).on("click", "#update", function () {
+                  $("#update-modal").css("display", "block");
+                });
+
+
+		update_item = $(".update-item");
+		for (let item of update_item) {
+		//console.log($this);
+                $(item).on( "click", function () {
+		  let type = $(this).html().replace(" ", "_");
+			get_data("http://127.0.0.1:5001/locations/all?uname={{uname}}", type);
+		  $("#update-modal").css("display", "none");
+		  $("#item-modal").css("display", "block");		  
+                });
+		}
 
 
 	});
 	</script>
 	<script>
+	let not = document.getElementsByClassName('not')[0];
 	
+	if ({{nots | tojson}} > 0) {
+	  console.log({{nots | tojson}});
+	  not.style.display = 'block';
+	}
 
-	
-	not.onclick = function () {
-	  let not_count = document.getElementsByClassName('not')[0];
-	  if (not_count.style('display') !== 'none')
-	    not_count.style('display') = 'none';
-	    let res = await fetch('http://127.0.0.1:5001/notification', {
-		  method: "POST",
-		  headers: {"Content-Type": "application/json"}
-		  body: JSON.stringify({notifications: 0})
-	    }).catch((err) => { console.log(err); });
-	    let val = await res.json();
+	async function get_not() {
+		let res = await fetch('http://127.0.0.1:5001/notification/{{nots | tojson}}').catch((err) => { console.log(err); });
+            let val = await res.json();
+	    console.log(val);
+
+	}
+
+
+	document.getElementById('not').onclick = function () {
+	 console.log('in here');
+	if (not.style.display !== 'none')
+	    not.style.display = 'none';
+	    new Promise(async(resolve, reject) => {
+	      await get_not();
+	      resolve();
+	    }
+	    );
 	    //here get the value and populate the div with these values
 	    
-	}
-	
-	
+	}	
 
 	</script>
 
