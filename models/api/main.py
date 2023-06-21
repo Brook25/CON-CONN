@@ -19,9 +19,13 @@ class Locations(Resource):
     def get(self, item_type):
         if item_type == "all":
             print(request.args)
-            e = engine.find({'coll': 'EquipmentSuppliers', 'find': {"username": request.args.get('uname') }, 'fields': {'locations': 1, '_id': 0} })[0]['locations']
+            e = engine.find({'coll': 'EquipmentSuppliers', 'find': {"username": request.args.get('uname') }, 'fields': {} })
+            if e:
+                e = e[0]['locations']
             e = [f'{x["name"]}/{x["city"]}/{x["sub_city"]}' for x in e]
-            m = engine.find({'coll': 'MaterialSuppliers', 'find': {"username": request.args.get('uname')}, 'fields': {'locations': 1, '_id': 0} })[0]['locations']
+            m = engine.find({'coll': 'MaterialSuppliers', 'find': {"username": request.args.get('uname')}, 'fields': {} })
+            if m:
+                m = m[0]['locations']
             m = [f'{x["name"]}/{x["city"]}/{x["sub_city"]}' for x in m]
             return jsonify({"e": e, "m": m})
     
@@ -32,7 +36,6 @@ class Locations(Resource):
 class Items(Resource):
 
     def get(self, item_type):
-        print(request.args)
         if 'locations' in request.args:
             uname = request.args.get('user')
             location = request.args.get('locations').split('/')
@@ -40,9 +43,9 @@ class Items(Resource):
             city = location[1]
             sub_city = location[2]
             coll = 'EquipmentSuppliers' if item_type == 'equipment' else 'MaterialSuppliers'
-            query = engine.find({"coll": coll, "find": {"username": uname, "locations.name": name,
-                "locations.sub_city": sub_city, "locations.city": city}, "fields": {"locations.items": 1, "_id": 0} })[0]['locations'][0]['items']
-            return json.dumps(query)
+            query = engine.find({"coll": coll, "find": {"username": uname}, "fields": {} })[0]['locations']
+            res = [loc for loc in query if loc['name'] == name and loc['city'] == city and loc['sub_city'] == sub_city][0]['items']
+            return json.dumps(res)
     def post(self, item_type):
         post_args = reqparse.RequestParser()
         post_args.add_argument("location", type="str", help="Location is required", required=True)
@@ -51,10 +54,15 @@ class Items(Resource):
         return None
         
     def delete(self, item_type):
-        if locations in request.args and locations:
-            for item in items:
-                pass
-        return None
+        data = json.loads(request.json)
+        detail = data.get('detail').split('/')
+        name, city, sub_city = detail[0], detail[1], detail[2]
+        print(data, detail, name, city)
+        coll = 'EquipmentSuppliers' if item_type == "equipment" else 'MaterialSuppliers'
+        engine.update({'coll': coll, 'row': {"username": data['uname']},
+            'update1': {"$pull": {"locations.$[l].items": {"name": {"$in": data['change'] } } } },
+            'array_filters': [{"l.name": name, "l.city": city, "l.sub_city": sub_city}] })
+        return json.dumps({"res": 'OK'})
 
     @staticmethod
     def abort_if_not_item_type(item_type):
@@ -164,27 +172,59 @@ class Notification(Resource):
 
 
 class Change(Resource):
-    def post(self, option):
+    def post(self, option, item):
         uname = request.form.get('uname')
-        detail = request.form.get('detail').split(':')
-        location = detail[1].split('/')
+        loc = request.form.get('detail').split('/')
         change = request.form.get('change').split(':')
-        print(detail)
-        coll = 'EquipmentSuppliers' if detail[0] == 'eq' else 'MaterialSuppliers'
-        if option == "price":
-            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": {"locations.$[l].equipments.$[e].price": change[1]}}, "array_filters": [{"l.name": name, "l.sub_city": sub_city, "l.city": city}, {"e.name": name}] })
+        new_loc = change[1].split('/')
+        coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
+        print(change, new_loc, loc)
+        if option == "Price":
+            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": {"locations.$[l].items.$[i].price": int(change[1])}}, "array_filters": [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}, {"i.name": change[0]}] })
         
         elif option == "location":
-            query = engine.find({'coll': coll, 'agg': [{"$match": {"username": "John"}}, {"$unwind": "$locations"}, {"$match": {"locations.name": "Tor-hailoch", "locations.sub_city": "Kolfe", "locations.city": "Addis"}}, {"$unwind": "$locations.equipments"}, {"$match": {"locations.equipments.name": "Mixer1"}}, {"$project": {"locations.equipments": 1, "_id": 0}}]})[0]['locations']['equipments']
+            pull, count = None, 0
+            query = engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {} })[0]['locations']
+            for l in query:
+                if l['city'] == loc[1] and l['sub_city'] == loc[2] and l['name'] == loc[0]:
+                    print(l)
+                    for it in l['items']:
+                        if it['name'] == change[0]:
+                            pull = it
+                            break
+                elif item == "equipment" and l['city'] == new_loc[0] and l['sub_city'] == new_loc[1] and l['name'] == new_loc[2]:
+                    print(l)
+                    for it in l['items']:
+                        if it['machine'] in change[0]:
+                            count += 1
+                    if pull:
+                        if item == "material":
+                            break
+                        elif item != "material" and count:
+                            break
+            if item == "equipment":
+                pull['name'] = f'{pull["machine"]}{count + 1}'
+
+            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$push": {"locations.$[l].items": pull}}, 'array_filters': [{"l.name": new_loc[2], "l.sub_city": new_loc[1], "l.city": new_loc[0]}] })
+            
             engine.update({'coll': coll, 'row': {"username": uname},
-            'update1': {"$pull": {"locations.$[l].equipments": {"name": "Excavator1"}}}, 'array_filters': [{"l.name": "Tor-hailoch", "l.sub_city": "Kolfe", "l.city": "Addis"}] })
-            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$push": {"locations.$[l].equipments": query}}, 'array_filters': [{"l.name": "Tor-hailoch", "l.sub_city": "Kolfe", "l.city": "Addis"}] })
-        
+            'update1': {"$pull": {"locations.$[l].items": {"name": change[0]}}}, 'array_filters': [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}] })
+            return json.dumps({"res": "ok"})
+
+
         else:
-            for c in change:
-                engine.find_and_update({'coll': coll, 'row': {"username": uname}, 'update': [{"$set": {"locations.$[l].equipments.$[e].avialabile":{"$eq": [False, "$present"]} }}], "array_filters": [{"l.name": name, "l.sub_city": sub_city, "l.city": city}, {"e.name": c}]})
-        
-        return json.dumps({'res': 'ok'})
+            change.pop()
+            query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname} } , {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.city": loc[1], "locations.sub_city": loc[2]}}, {"$project": {"locations.items": {"$filter": {"input": "$locations.items", "as": "inner_doc", "cond": {"$in": ["$$inner_doc.name", change] } } } } } ] })[0]['locations']['items']
+            av = dict([[item['name'].lower(), not(item['available'])] for item in query])
+            update1 = {f"locations.$[l].items.$[{k}].available":  av[k] for k in sorted(av.keys())}
+            array_filters = [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}]+ [{f"{k}.name": k[0].upper() + k[1:]} for k in sorted(av.keys())]
+            dct = {'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters}
+            print(dct)
+            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters})
+            
+
+         
+            return json.dumps({'res': 'ok'})
 
 
 
@@ -194,7 +234,14 @@ api.add_resource(Complaints, '/complaints/<string:item_type>/<string:supp_id>')
 api.add_resource(Reviews, '/reviews/<string:item_or_task>')
 api.add_resource(History, '/history/<string:user>')
 api.add_resource(Notification, '/notification/<int:notn>')
-api.add_resource(Change, '/change/<string:option>')
+api.add_resource(Change, '/change/<string:option>/<string:item>')
+
+
+
+#query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname}}, {"$unwind": "$locations"}, {"$match": {"locations.name": location[0], "locations.sub_city": location[2], "locations.city": location[1]}}, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": change[0]}}, {"$project": {"locations.items": 1, "_id": 0}}]})[0]['locations']['items']
+
+
+
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True, host='0.0.0.0')

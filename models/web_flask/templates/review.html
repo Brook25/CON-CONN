@@ -114,7 +114,7 @@
 			      </div>
 			    </div>
 		</div>
-	{% if 'review' in request.path %}
+	{% if 'review' in request.args.get('loc') %}
 	<div class="modal" id="modal">
         	<div class="modal-content">
         	<div id="review-title">
@@ -125,14 +125,16 @@
         	</div>
         </div>
 	{% else %}
+	<form method="POST">
 	<div>
 	<div>
-	<input/>
+	<input name="input" id="input"/>
 	</div>
 	<div>
 	<button>Submit</button>
 	</div>
 	</div>
+	</form>
 	{% endif %}
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -169,10 +171,10 @@
                   {
                     table.rows[i].onclick = function()
                       {
-			 if ( {{ request.path | tojson }}.includes('review') ) {
+			   let machine_name = this.cells[1].innerHTML;
+			 if ( {{ request.args.get('loc') | tojson }}.includes('review') ) {
 			   let uname = {{ data[0] | tojson }};
 			   let loc = {{ data[1] | tojson }};
-			   let machine_name = this.cells[1].innerHTML;
 			   let items = JSON.parse('{{ items | tojson }}')
 			   let review_div = document.getElementById("reviews");
 			   let val = items.find((elem) => elem['name'] === machine_name);
@@ -184,10 +186,12 @@
 		      }
 
 			else {
-			  
-
-
-
+			  let del_input = document.getElementById('input');
+				if ( del_input.value.includes(machine_name + ', ') ) { 
+			  del_input.value = del_input.value.replace(machine_name  + ', ', '');
+			}
+			else
+			  del_input.value += machine_name + ', ';			 
 			}
 
 			      //let data = { "uname": uname, "loc": loc, "name": machine_name }
@@ -198,20 +202,24 @@
                       };
 
    
-		/*$("tbody tr").click(function() {
-		  if ($(this).hasClass('selected')) {
-			$(this).removeClass('selected');
-
-		  }
-		  else {
-		    $(this).addClass('selected');
-		  }
-		});*/
-
+	if ({{request.args.get('loc') | tojson}}.includes('review')) {
 		$("tbody tr").click(function() {
-   $(this).addClass('selected').siblings().removeClass('selected');
-        console.log('selected');
-});
+   		$(this).addClass('selected').siblings().removeClass('selected');
+        	console.log('selected');
+	});
+}
+		else {
+		$("tbody tr").click(function() {
+                  if ($(this).hasClass('selected')) {
+                        $(this).removeClass('selected');
+
+                  }
+                  else {
+                    $(this).addClass('selected');
+                  }
+                });
+}
+
         	</script>
 
 	</body>

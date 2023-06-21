@@ -125,18 +125,16 @@ left: 40%;
 		</div>
 
                  <form method="POST">
-		{% if 'location' not in request.args.get('loc') %}
 		<input type="text" id="data" name="data" value=""/>
-		{% endif %}
-		{% if 'Change_availability' not in request.args.get('loc')%}
+		{% if 'availability' not in request.args.get('loc')%}
 		 <div class="modal">
 			 <div class="modal-content">
-			{% if 'Change_Price' in request.args.get('loc') %}
+			{% if 'Price' in request.args.get('loc') %}
 			<div align="center"><h4>Input new price</h4></div>
 			<div align="center">
                         <input type="text" id="input-data" name="input" value=""/>
 			</div>
-			{% elif 'Change_location' in request.args.get('loc') %}
+			{% elif 'location' in request.args.get('loc') %}
 			<div align="center">
             <h1 align="center">Become A Supplier</h1>
             <div class="row">
@@ -158,7 +156,6 @@ left: 40%;
                     <select name="location" data-live-search="true" id="location" class="form-control" title="Select location" align="center" onchange="updateLocation()"> </select>
 
                 </div>
-		<input type="text" id="input-data" name="input" value=""/>
 	    </div>
 			</div>
 			{% endif %}
@@ -176,7 +173,7 @@ left: 40%;
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
-	{% if 'Change_location' in request.args.get('loc') %}
+	{% if 'location' in request.args.get('loc') %}
 	<script> 
 
         function updateLocation() {
@@ -185,7 +182,7 @@ left: 40%;
 	  let city = document.getElementById("city").value;
 	  let val = city + '/' + sub_city + '/' + loc;
 	  console.log(val);
-          document.getElementById("input-data").value += val;
+          document.getElementById("data").value += val;
         }
 	
 	$(document).ready(function () {
@@ -246,11 +243,7 @@ left: 40%;
 	{% endif %}
 		<script>
                 let table = document.getElementById('table');
-		let inputElem;
-		if (document.getElementById('data'))
-		  inputElem = document.getElementById("data");
-		else
-		  inputElem = document.getElementById('input-data');
+		let inputElem = document.getElementById("data");
 		let end_point = {{ request.args.get('loc') | tojson }};
 		console.log(inputElem, '{{ request.args.get("loc") }}');
                 for(let i = 1; i < table.rows.length; i++)
@@ -261,16 +254,16 @@ left: 40%;
 			//console.log(val);
 			if (end_point.includes('Price') || end_point.includes('location'))
 			  inputElem.value = val;
+			      
 			else {
-			  console.log(inputElem.value);
-			  if (inputElem.value.includes(val))
+			if (inputElem.value.includes(val))
 			    inputElem.value = inputElem.value.replace(val, "");
-			  else
+			else
 			    inputElem.value += val;
 			}
 			if (!(end_point.includes('availability')))
-			  document.getElementsByClassName("modal")[0].style.display = "block";
-		      };
+			  document.getElementsByClassName("modal")[0].style.display = "block";  
+		    }
                   }
 		</script>
    		{% if 'availability' in request.args.get('loc') %}

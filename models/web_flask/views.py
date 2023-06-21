@@ -199,13 +199,21 @@ def access_api(end_point):
             res = requests.post(url + 'reviews/add_review', json=data, headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
         if end_point == 'loc':
             detail = request.args.get('loc').split(':')
-            change = request.form.get('input')
-            ep = detail.pop(1).split('_')[1]
-            if 'availability' not in ep:
-                change += ":" + request.args.get('data')
-            detail = ":".join(detail)
-            data = {'uname': user, 'detail': detail, 'change': change}
-            res = requests.post(url + f'change/{ep}', data=data)
+            change = request.form.get('data')
+            item = "equipment" if detail.pop(0) == "eq" else "material"
+            ep = detail.pop(0)
+            if 'remove' in ep:
+                change = change[:-2].split(', ')
+                data = json.dumps({'uname': user, 'detail': detail[0], 'change': change})
+                res = json.loads(requests.delete(url + f'item/{item}', json=data).json())
+                print(res)
+                return "Done"
+            ep = ep.split('_')[1]
+            if 'Price' in ep:
+                change += request.form.get('input')
+            data = {'uname': user, 'detail': detail[0], 'change': change}
+            print(data, ep, item)
+            res = requests.post(url + f'change/{ep}/{item}', data=data)
             res = json.loads(res.json())
         #print(res)
         return "<h1>Done</h1>"
@@ -220,7 +228,7 @@ def access_api(end_point):
         if 'review' in req:
             return render_template('review.html', items=json.loads(res), data=(user, req[2]))
         if 'Change' in req[1]:
-            return render_template('update_or_review.html', cities=cities, items=items, data=(user, req[2]))
+            return render_template('update_or_review.html', cities=cities, items=json.loads(res), data=(user, req[2]))
         if 'remove' in req[1]:
             return render_template('review.html', items=json.loads(res), data=(user, req[2]))
     
