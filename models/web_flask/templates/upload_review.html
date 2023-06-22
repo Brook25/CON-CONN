@@ -178,7 +178,8 @@ input {
 				<tr>
 				<th>username </th>
 				<th>location </th>
-				<th>Mahine name </th>
+				<th>Name </th>
+				<th>Type </th>
 				<th>Date </th>
 				<th></th>
 				</tr>
@@ -189,6 +190,7 @@ input {
 				<td>{{row.username}}</td>
 				<td>{{row.location}}</td>
 				<td>{{row.name}}</td>
+				<td>{{row.item}}</td>
 				<td>{{row.date}}</td>
 				</tr>
 				{% endfor %}
@@ -257,7 +259,7 @@ input {
                     table.rows[i].onclick = function()
                       {
 			      modal.style.display = "block";
-			      supp_input.value = this.cells[0].innerHTML + ':' + this.cells[1].innerHTML + ':' + this.cells[2].innerHTML;
+			      supp_input.value = this.cells[0].innerHTML + ':' + this.cells[1].innerHTML + ':' + this.cells[2].innerHTML + ':' + this.cells[3].innerHTML;
 		      }
                       };
 

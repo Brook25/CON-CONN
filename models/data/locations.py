@@ -4,11 +4,12 @@ from .equipments import Equipment
 from .materials import Material
 
 
-class Location(mongoengine.EmbeddedDocument):
+class MLocation(mongoengine.EmbeddedDocument):
     name = mongoengine.StringField(required=True)
     city = mongoengine.StringField(required=True)
     sub_city = mongoengine.StringField(required=True)
     items = mongoengine.EmbeddedDocumentListField(Material)
+    meta = {'allow_inheritance': True }
 
     @classmethod
     def append(cls, dct):
@@ -19,3 +20,6 @@ class Location(mongoengine.EmbeddedDocument):
         dct['username'].locations.append(loc)
         dct['username'].save()
 
+
+class ELocation(MLocation):
+    items = mongoengine.EmbeddedDocumentListField(Equipment)

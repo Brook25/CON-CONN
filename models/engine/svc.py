@@ -7,12 +7,12 @@ from models.data.equipments import Equipment
 from models.data.materials import Material
 from models.data.Equipment_suppliers import EquipmentSuppliers
 from models.data.material_suppliers import MaterialSuppliers
-from models.data.locations import Location
+from models.data.locations import MLocation, ELocation
 from models.data.users import User
 from models.data.booking import Booking
 import mongoengine
 
-classes = {'User': User, 'Equipment': Equipment, 'Material': Material, 'MaterialSuppliers': MaterialSuppliers, 'Location': Location, 'EquipmentSuppliers': EquipmentSuppliers, 'Booking': Booking}
+classes = {'User': User, 'Equipment': Equipment, 'Material': Material, 'MaterialSuppliers': MaterialSuppliers, 'MLocation': MLocation, 'ELocation': ELocation, 'EquipmentSuppliers': EquipmentSuppliers, 'Booking': Booking}
 
 
 class DBEngine:
@@ -52,6 +52,7 @@ class DBEngine:
 
     def append_or_create(self, dct):
         coll = classes[dct['coll']]
+        print(coll)
         supp = coll.objects(username=dct['username']).first()
         if supp:
             dct['username'] = supp
@@ -68,17 +69,19 @@ class DBEngine:
             else:
                 if dct['coll'][0] == "E":
                     self.equipment_count(dct['append'])
-                Location.append(dct)
+                    ELocation.append(dct)
+                else:
+                    MLocation.append(dct)
         else:
             if dct['coll'][0] == "E":
                 self.equipment_count(dct['append'])
                 eq = [Equipment(**(eq)) for eq in dct['append']]
-                loc = Location(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=eq)
+                loc = ELocation(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=eq)
                 dct = {'username': dct['username'], 'locations': [loc], 'contact_info': [dct['contact_info']]}
                 self.add_new({'coll': 'EquipmentSuppliers', 'docs': dct})
             else:
                 mt = [Material(**(eq)) for eq in dct['append']]
-                loc = Location(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=mt)
+                loc = MLocation(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=mt)
                 dct = {'username': dct['username'], 'locations': [loc], 'contact_info': [dct['contact_info']] }
                 self.add_new({'coll': 'MaterialSuppliers', 'docs': dct})
 
@@ -117,16 +120,6 @@ class DBEngine:
             print(row, update, array_filters)
             coll.update_one(row, update, array_filters=dct['array_filters'], upsert=False)
 
-    def find_and_update(self, dct):
-        coll = classes[dct['coll']]._get_collection()
-        updated_doc = coll.find_one_and_update(filter=dct['row'], 
-                                update=dct['update'],
-                                projection=dct['projection'],
-                                array_filters=dct['array_filters'],
-                                upsert=False,
-                                return_document=pymongo.collection.ReturnDocument.AFTER
-                                )
-        return updated_doc
     
 
     def init_validate(self, obj_dict):
@@ -224,7 +217,7 @@ class DBEngine:
 
 #print(db.find({'coll': 'User'}))
 
-#db.add_new({'coll': EquipmentSuppliers, 'docs': dct1})
+#db.add_new({'coll': 'EquipmentSuppliers', 'docs': dct1})
 #db.update({'coll': EquipmentSuppliers, 'query': {'username': 'Brook'}, 'update': {'$push': {'locations': {"name": "Kaliti", "sub_city": "Akaki", "city": "Addis", 'equipments': [{"machine": "Mixer", "name": "Mixer1", "years_used": 4, "price": 600}, {"machine": "Compactor", "name": "Compactor1", "years_used": 4, "price": 600}]} } } })
 #print(db.find({'coll': 'EquipmentSuppliers'}))
 

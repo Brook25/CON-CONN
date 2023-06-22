@@ -124,13 +124,14 @@ class Reviews(Resource):
             supp = req.get('supp').split(':')
             supp_name = supp[0]
             print(supp)
-            loc = supp[1].split('-')
+            loc = supp[1].split('/')
             print(loc)
             name = supp[2]
-            item = supp[-1]
+            print(name)
             rev = {"username": current_user, "review": req.get("rev")}
-            coll = 'EquipmentSuppliers' if item[0] == 'e' else 'MaterialSuppliers'
-            engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[ln].items.$[it].reviews": rev}}, "array_filters": [{"ln.name": loc[0]+'-'+loc[1], "ln.sub_city": loc[2], "ln.city": loc[3]}, {"it.name": name}]})
+            print(rev)
+            coll = 'EquipmentSuppliers' if supp[-1][0] == 'e' else 'MaterialSuppliers'
+            engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[ln].items.$[it].reviews": rev}}, "array_filters": [{"ln.name": loc[0], "ln.sub_city": loc[1], "ln.city": loc[2]}, {"it.name": name}]})
             print("done")
             return None, 200
 
@@ -158,6 +159,7 @@ class History(Resource):
         for h in history:
             h['date'] = h['date'].isoformat()
             h['return_date'] = h['return_date'].isoformat()
+        print(history)
         return json.dumps(history)
 
 

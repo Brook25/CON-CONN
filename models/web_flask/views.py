@@ -52,6 +52,7 @@ def query(item):
         flash(f"Equipment succesfully booked", "success")
         return "<h1>Done!<\h1>"
         #return redirect(url_for("views.welcome"))
+    print(query)
     return render_template("queries.html", query=query)
 
 
@@ -123,6 +124,7 @@ def book(item):
         location = request.form.get('location')
         equipments = request.form.get('equipment').split(', ')
         query1 = engine.find({'coll': coll, 'agg': [{"$unwind": "$locations"}, {"$unwind": "$locations.items"}, {"$match": {"locations.name": location, "locations.city": city, "locations.sub_city": sub_city, f"locations.items.{selector}": { "$in": equipments } } }, {"$project": {"_id": 0, "username": 1, "locations.items": 1, "contact_info": 1} }] })
+        print(city, sub_city, location, equipments)
         loc = f"{item}/{location}/{sub_city}/{city}"
         return redirect(url_for('views.query', item=item, query1=json.dumps(query1), loc=loc, days=request.form.get('days')))
     if item == 'equipment':
@@ -156,6 +158,7 @@ def register(type, item):
         dct = {"coll": coll, 'username': uname, 'filter':
                 {'name': location, 'sub_city': sub_city,
                 'city': city}, 'append': values}
+        print(dct)
         if type == 'new':
             dct['contact_info'] = form.get('contactinfo')
         engine.append_or_create(dct)
@@ -195,7 +198,8 @@ def access_api(end_point):
             supp = request.form.get('supp')
             rev = request.form.get('rev-input')
             rat = request.form.get('rate')
-            data = json.dumps({'uname': user, 'supp': supp+':material', 'rev': rev, 'rating': rat})
+            data = json.dumps({'uname': user, 'supp': supp, 'rev': rev, 'rating': rat})
+            print(data)
             res = requests.post(url + 'reviews/add_review', json=data, headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
         if end_point == 'loc':
             detail = request.args.get('loc').split(':')
@@ -225,6 +229,7 @@ def access_api(end_point):
         else:
             res = requests.get(url + "item/material",
                     params={'user': user, 'locations': req[2]}).json()
+        print(res)
         if 'review' in req:
             return render_template('review.html', items=json.loads(res), data=(user, req[2]))
         if 'Change' in req[1]:

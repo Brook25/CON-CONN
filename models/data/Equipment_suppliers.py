@@ -2,11 +2,11 @@
 import mongoengine
 from mongoengine import StringField
 from .booking import Booking
-from models.data.locations import Location
+from models.data.locations import ELocation, MLocation
 
 class EquipmentSuppliers(mongoengine.Document):
     username = mongoengine.StringField(required=True)
-    locations = mongoengine.EmbeddedDocumentListField(Location)
+    locations = mongoengine.EmbeddedDocumentListField(ELocation)
     contact_info = mongoengine.ListField(StringField(required=True))
     booked_equipments = mongoengine.EmbeddedDocumentListField(Booking)
 

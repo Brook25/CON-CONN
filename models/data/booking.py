@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import datetime
 from mongoengine import EmbeddedDocument, StringField, DateTimeField, EmbeddedDocumentField
-from .locations import Location
 import mongoengine
 
 
