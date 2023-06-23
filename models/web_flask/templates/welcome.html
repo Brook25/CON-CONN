@@ -435,13 +435,13 @@ color: red;
                     </li>
 
                     <li>
-			    <a href="javascript:window.open('{{ url_for('views.supply') }}', 'popup', 'width=200,height=150');" class="side-content">
+			    <a href="{{url_for('views.view', item='bookings')}}" class="side-content">
                             <i class="fas fa-shopping-cart"></i>
-                            <span class="nav-item">Orders</span></a>
+                            <span class="nav-item">Bookings</span></a>
                     </li>
 
                     <li>
-                            <a href="#" id="getequip" class="side-content">
+			    <a href="{{url_for('views.view', item='equipments')}}" id="getequip" class="side-content">
                             <i class="fas fa-hammer"></i>
                             <span class="nav-item">Equipments</span></a>
                     </li>

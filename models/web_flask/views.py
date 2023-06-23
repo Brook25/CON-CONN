@@ -48,7 +48,7 @@ def query(item):
             booked["username"] = uname
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {"$push":  {f"{item}_bookings": booking } } } )
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$push":  {f"booked_{item}s": booked } } })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.not": f"You have successfully booked a {item}" } } })
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": f"You have successfully booked a {item}" } } })
         flash(f"Equipment succesfully booked", "success")
         return "<h1>Done!<\h1>"
         #return redirect(url_for("views.welcome"))
@@ -257,20 +257,31 @@ def access_api(end_point):
 
 @views.route('/view/<string:item>')
 def view(item):
+    uname = current_user.username
     if item == 'bookings':
-        #TODO: query all bookings
-
-    elif item == 'equipments':
-        #TODO: query all equipments
-    
-    elif item == "mateials";
-        #TODO: query all materials
+        bookings = engine.find({'coll': 'User', 'find': {'username': uname}, 'fields': {'equipment_bookings': 1, 'material_bookings': 1, '_id': 0} })[0]
+        bookings['material_bookings'].extend(bookings['equipment_bookings'])
+        bookings = bookings['material_bookings']
+        data=bookings
+        print(data)
+    elif item == 'equipments' or item == 'materials':
+        coll = 'EquipmentSuppliers' if item[0] == 'e' else 'MaterialSuppliers'
+        locs = engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {'locations': 1, '_id': 0} })[0]['locations']
+        for loc in locs:
+            loc['name'] += '/' + loc['sub_city'] + '/' + loc['city']
+            loc.pop('city', None)
+            loc.pop('sub_city', None)
+        print(locs)        
 
     elif item == "history":
+        pass
         #TODO: query history
     elif item == "booked":
+        pass
         #TODO: optional
-
+    
+    return "Done"
+    return render_template('bookings_and_items.html', data=data)
 
 
 
