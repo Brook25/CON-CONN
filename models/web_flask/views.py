@@ -48,7 +48,7 @@ def query(item):
             booked["username"] = uname
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {"$push":  {f"{item}_bookings": booking } } } )
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$push":  {f"booked_{item}s": booked } } })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$set": {"notifications.not": f"You have successfully booked a {item}" } } })
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.not": f"You have successfully booked a {item}" } } })
         flash(f"Equipment succesfully booked", "success")
         return "<h1>Done!<\h1>"
         #return redirect(url_for("views.welcome"))
@@ -61,8 +61,10 @@ def query(item):
 @login_required
 def welcome():
     locations = ["Total", "Mexico", "Piassa"]
+    uname = current_user.username
     #nots = engine.find({'coll': 'User', 'find': {'username': current_user.username}, 'fields': {"notifications": 1, "_id": 0} } )
-    nots = 3
+    print(uname)
+    nots = engine.find({'coll': 'User', 'find': {'username': uname}, 'fields': {"_id": 0, "notifications.num": 1} })[0]['notifications']['num']
     if request.method == "POST":
         city = request.form.get('city')
         sub_city = request.form.get('sub-city')
@@ -73,7 +75,7 @@ def welcome():
 
         #print(city, sub_city, location, equipment)
     engine.feed_history(current_user.username)
-    return render_template("welcome.html", cities=cities, equipments=equipments, nots=nots, uname=current_user.username)
+    return render_template("welcome.html", cities=cities, equipments=equipments, nots=int(nots), uname=current_user.username)
 
 @views.route('/city', methods=["POST", "GET"])
 def city():
@@ -252,12 +254,22 @@ def access_api(end_point):
         
         return "<h1>done</h1>"
     
-    #return "<h1>done</h1>"
 
-#@views.route('/remove')
-#def remove():
+@views.route('/view/<string:item>')
+def view(item):
+    if item == 'bookings':
+        #TODO: query all bookings
 
+    elif item == 'equipments':
+        #TODO: query all equipments
+    
+    elif item == "mateials";
+        #TODO: query all materials
 
+    elif item == "history":
+        #TODO: query history
+    elif item == "booked":
+        #TODO: optional
 
 
 

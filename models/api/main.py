@@ -132,6 +132,7 @@ class Reviews(Resource):
             print(rev)
             coll = 'EquipmentSuppliers' if supp[-1][0] == 'e' else 'MaterialSuppliers'
             engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[ln].items.$[it].reviews": rev}}, "array_filters": [{"ln.name": loc[0], "ln.sub_city": loc[1], "ln.city": loc[2]}, {"it.name": name}]})
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.not": f"You have successfully added a review" } } })
             print("done")
             return None, 200
 
@@ -165,12 +166,14 @@ class History(Resource):
 
 class Notification(Resource):
     def get(self, notn):
-        print(notn)
+        uname = request.args.get('uname')
         if notn > 0:
-            pass
-            #change the notification no value to 0
-        #find the messages in notification and return them
-        return json.dumps(["you have a review", "you have a comment"])
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {'$set': {'notifications.num': 0} } } )
+        nots = engine.find({'coll': 'User', 'agg': [{'$match': {'username': uname} }, {"$project": {"_id": 0, "notifications.notes": {"$slice": ["$notifications.notes", 25] } }}] })[0]['notifications']['notes']
+
+        print(nots)
+        #return json.dumps({"res": "ok"})
+        return json.dumps(nots)
 
 
 class Change(Resource):
@@ -241,7 +244,6 @@ api.add_resource(Change, '/change/<string:option>/<string:item>')
 
 
 #query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname}}, {"$unwind": "$locations"}, {"$match": {"locations.name": location[0], "locations.sub_city": location[2], "locations.city": location[1]}}, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": change[0]}}, {"$project": {"locations.items": 1, "_id": 0}}]})[0]['locations']['items']
-
 
 
 

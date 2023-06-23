@@ -138,6 +138,9 @@ class DBEngine:
     def feed_history(self, username):
         eq_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$equipment_bookings"}, {"$match": {"equipment_bookings.return_date": {"$gt": datetime.utcnow()} } }, {"$project": {"equipment_bookings": 1, "_id": 0} }] })
         mt_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$material_bookings"}, {"$match": {"material_bookings.return_date": {"$gt": datetime.utcnow()} } }, {"$project": {"material_bookings": 1, "_id": 0} }] })
+        self.update({'coll': 'User', 'row': {"username": username}, 'update1': {"$pull":  {"equipment_bookings": {"return_date": {"$gt": datetime.utcnow()} }, "material_bookings": {"return_date": {"$gt": datetime.utcnow()} } } } })
+        self.update({'coll': 'EquipmentSuppliers', 'row': {"username": username}, 'update1': {"$pull": {"booked_equipments": {"return_date": {"$gt": datetime.utcnow() } } } } })
+        self.update({'coll': 'MaterialSuppliers', 'row': {"username": username}, 'update1': {"$pull": {"booked_equipments": {"return_date": {"$gt": datetime.utcnow() } } } } })
         history = list(map(lambda x: x['equipment_bookings'], eq_history)) + list(map(lambda x: x['material_bookings'], mt_history))
         history = sorted(history, key=lambda x: x['date'])
         self.update({'coll': 'User', 'row': {'username': username},

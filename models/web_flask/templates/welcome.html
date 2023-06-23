@@ -232,16 +232,43 @@ h1{
   background: #F00;
   position: absolute;
   line-height: 30px;
-  right: 20px;
-  top: 2px;
+  right: 27px;
+  top: 4px;
   padding: 8px;
   padding-top: 0px;
   color: white;
-  width: 27px;
-  height: 27px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
   border-radius: 50%;
-  text-align: center;
-  font-size: 15px;
+}
+
+.not-modal {
+position: absolute;
+width: 40%;
+background-color: #454545;
+display: none;
+border-radius: 9px;
+cursor: pointer;
+padding: 9px;
+right: 19%;
+border: 1px solid #888;
+top: 35px;
+
+}
+
+.not-item {
+box-sizing: border-box;
+color: white;
+position: relative;
+width: 100%;
+padding: 5px;
+float: left;
+font-size: 14px;
+}
+
+.not-item:hover {
+background-color: #808080;
 }
 
 
@@ -496,6 +523,8 @@ color: red;
 	<div class="update-item">Change location</div>
 	</div>
 	</div>
+	<div class="not-modal">
+	</div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -600,10 +629,16 @@ color: red;
 	}
 
 	async function get_not() {
-		let res = await fetch('http://127.0.0.1:5001/notification/{{nots | tojson}}').catch((err) => { console.log(err); });
-            let val = await res.json();
-	    console.log(val);
-
+		let uname = JSON.parse('{{uname | tojson}}')
+		let url = 'http://127.0.0.1:5001/notification/{{nots | tojson}}' + '?' + (new URLSearchParams({uname: uname})).toString();
+		let res = await fetch(url).catch((err) => { console.log(err); });
+          let val = await res.json();
+	  val = JSON.parse(val);
+	  console.log(val);
+	  not_modal = document.getElementsByClassName('not-modal')[0];
+	  for (elem of val)
+	    not_modal.innerHTML += '<div class="not-item">' + elem + '</div>';
+	    not_modal.style.display = 'block';
 	}
 
 
@@ -616,7 +651,6 @@ color: red;
 	      resolve();
 	    }
 	    );
-	    //here get the value and populate the div with these values
 	    
 	}	
 
