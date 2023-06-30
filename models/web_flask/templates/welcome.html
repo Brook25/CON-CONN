@@ -27,6 +27,7 @@
 }
 
 body {
+  position: relative;
   background: #44a88d;
 }
 
@@ -59,12 +60,14 @@ body {
   color: black;
   font-size: 17px;
   padding: 7px 13px;
+  text-decoration: none;
   border-radius: 8px;
   /*text-transform: uppercase;*/
 }
 
 .nav_x:hover{
   transition: .5s;
+  text-decoration: none;
   transform: scale(1.03);
 }
 
@@ -80,6 +83,7 @@ display: none;
   height: 100%;
   left: 0;
   background: #fff;
+  text-decoration: none;
   width: 90px;
   overflow: hidden;
   transition: width 0.2s linear;
@@ -94,6 +98,16 @@ display: none;
   transition: all 0.2s ease;
   margin: 10px 0 0 10px;
 }
+
+
+img {
+ width: 45px;
+ height: 45px;
+ border-radius: 50%;
+}
+
+
+
 
 #logo img{
  width: 45px;
@@ -110,10 +124,11 @@ display: none;
 }
 
 .side-content{
-  position: relative; 
+  position: relative;
   color: rgb(85, 83, 83); 
   font-size: 14px; 
   display: table; 
+  text-decoration: none;
   width: 300px; 
   padding: 10px;
 }
@@ -153,6 +168,7 @@ margin-left: 15px;
 .side-content:hover
 {
 	background: #eee;
+  text-decoration: none;
 }
 
 .sidebar:hover{
@@ -227,6 +243,7 @@ h1{
   text-shadow: 0 15px 10px rgba(0, 0, 0, 0.2);
 }
 
+
 .not {
   display: none;
   background: #F00;
@@ -298,7 +315,7 @@ background-color: #808080;
 
 .flex-box h3{
    color: #444;
-   padding: 10px 0;
+   /*padding: 10px 0;*/
    font-size: 20px;
 }
 
@@ -315,6 +332,7 @@ background-color: #808080;
   color: blue;
   width: 100px;
   display: inline-block;
+  text-decoration: none;
 }
 
 
@@ -364,32 +382,37 @@ color: red;
 			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
 			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
 			</li>
-			<li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
                   </ul>
 	 </nav><br /><br />
 
 	<div class="wrapper">
-		  <h1 align="center">Our Services</h1>
+		  <h1 align="center">Services</h1>
 		<div class="flex-container">
 		    <div class="flex-box">
                         <h3>Book an equipment</h3>
+			<img src="/static/images/exc.PNG" alt=""><br />
 			<a href="{{ url_for('views.book', item='equipment')}}" class="btn">readmore</a>
                     </div>
 
 		    <div class="flex-box">
 			<h3>Book a material</h3>
+			<img src="/static/images/shov.PNG" alt=""><br />
 			<a href="{{ url_for('views.book', item='material') }}" class="btn">readmore</a>
 		    </div>
 		     <div class="flex-box">
                         <h3>Become a material supplier</h3>
+			<img src="/static/images/roster.PNG" alt=""><br />
                         <a href="{{ url_for('views.register', type='new', item='material')}}" class="btn">ieadmore</a>
                     </div>
 		    <div class="flex-box">
-                        <h3>Become an Equipment supplier</h3>
+                        <h3>Become Equipment supplier</h3>
+			<img src="/static/images/roster.PNG" alt=""><br />
 			<a href="{{ url_for('views.register', type='new', item='equipment')}}" class="btn">readmore</a>
                     </div>
 		     <div class="flex-box">
                         <h3>Review and add ratings</h3>
+			<img src="/static/images/review.PNG" alt=""><br />
 			<a href="{{url_for('views.access_api', end_point='review')}}" class="btn">readmore</a>
                     </div>
 		<div class="flex-box">
@@ -401,27 +424,33 @@ color: red;
 		 <div class="flex-container">
                     <div class="flex-box">
                         <h3>Remove an item</h3>
+			<img src="/static/images/delete.PNG" alt=""><br />
                         <a id="remove" href="#" class="btn"  >readmore</a>
                     </div>
 
                     <div class="flex-box">
                         <h3>View Reveiws and Ratings</h3>
+			<img src="/static/images/rat.PNG" alt=""><br />
                         <a id="reviews" href="#" class="btn">readmore</a>
                     </div>
                      <div class="flex-box">
                         <h3>Have a Complaint?</h3>
+			<img src="/static/images/exc.PNG" alt=""><br />
 			<a href="{{url_for('views.access_api', end_point='complaints')}}" class="btn">readmore</a>
                     </div>
                     <div class="flex-box">
                         <h3>Add Material(s)</h3>
+			<img src="/static/images/new.PNG" alt=""><br />
 			<a href="{{ url_for('views.register', type='add', item='material') }}" class="btn">readmore</a>
                     </div>
                      <div class="flex-box">
                         <h3>Update </h3>
+			<img src="/static/images/udpate.PNG" alt=""><br />
                         <a id="update" href="#" class="btn">readmore</a>
                     </div>
                      <div class="flex-box">
                         <h3>Add Equipment(s)</h3>
+			<img src="/static/images/new.PNG" alt=""><br />
                         <a href="{{ url_for('views.register', type='add', item='equipment') }}" class="btn">readmore</a>
                     </div>
 

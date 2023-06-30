@@ -3,6 +3,8 @@
 	<head>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" /> 
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
 
 <style>
 
@@ -27,7 +29,7 @@
   padding: 20px;
   border: 1px solid #888;
   width: 50%;
-  height: 55%;
+  height: 50%;
 }
 
 
@@ -78,17 +80,102 @@
   color: #ff0000;
 }
 
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  position: relative;
+  display: block;
+  float: right;
+  top: 10px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+
 
 #btn1 {
 position: relative;
-top: 20px;
-left: 40%;
+top: 35px;
+left: 45%;
 }
 
 
 </style>
 	</head>
 	<body>
+		 <nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+
 		<div align="center">
 			<div class="close-btn">&times;</div>
 			    <div class="modal-dialog">
@@ -102,18 +189,26 @@ left: 40%;
 				 <table class="content-table" id="table">
 				<thead>
 				<tr>
+				{% if 'eq' in request.args.get('loc')%}
 				<th>Machine</th>
+				{% endif %}
 				<th>Name</th>
+				{% if 'eq' in request.args.get('loc')%}
 				<th>Years used</th>
+				{% endif %}
 				<th>Rating</th>
 				</tr>
 				</thead>
 				<tbody>
 				{% for item in items %}
 				<tr>
+				{% if 'eq' in request.args.get('loc')%}
 				<td>{{item.machine}}</td>
+				{% endif %}
 				<td>{{item.name}}</td>
+				{% if 'eq' in request.args.get('loc')%}
 				<td>{{item.years_used}}</td>
+				{% endif %}
 				<td>{{item.rating}}</td>
 				</tr>
 				{% endfor %}
@@ -125,10 +220,11 @@ left: 40%;
 		</div>
 
                  <form method="POST">
-		<input type="text" id="data" name="data" value=""/>
+		<input type="hidden" id="data" name="data" value=""/>
 		{% if 'availability' not in request.args.get('loc')%}
-		 <div class="modal">
+		 <div class="modal" id="modal">
 			 <div class="modal-content">
+                	<span id="close" class="close">&times;</span>
 			{% if 'Price' in request.args.get('loc') %}
 			<div align="center"><h4>Input new price</h4></div>
 			<div align="center">
@@ -175,6 +271,7 @@ left: 40%;
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 	{% if 'location' in request.args.get('loc') %}
 	<script> 
+ 	
 
         function updateLocation() {
           let loc = document.getElementById("location").value;
@@ -280,6 +377,19 @@ left: 40%;
 		</script>
 		{% else %}
 		<script>
+		let modal = document.getElementById('modal');
+	        console.log(modal);
+		let span = document.getElementById("close");
+        	span.onclick = function() {
+                modal.style.display = "none";
+        	}
+
+        	window.onclick = function(event) {
+          	if (event.target == modal) {
+                  modal.style.display = "none";
+          	}
+        	}
+	
 		$("tbody tr").click(function() {
    		$(this).addClass('selected').siblings().removeClass('selected');
         	console.log('selected');
