@@ -5,7 +5,7 @@ class Material(mongoengine.EmbeddedDocument):
     available = mongoengine.BooleanField(default=True)
     price = mongoengine.IntField(required=True)
     reviews = mongoengine.ListField(mongoengine.DictField)
-    rating = mongoengine.IntField(default=2)
+    rating = mongoengine.ListField(mongoengine.IntField(), default=[2, 1])
     meta = {'allow_inheritance': True}
 
     @classmethod

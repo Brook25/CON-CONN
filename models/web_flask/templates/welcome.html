@@ -161,7 +161,7 @@ margin-left: 15px;
 }
 
 
-.modal, .modal1 {
+.modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
@@ -176,7 +176,7 @@ margin-left: 15px;
 }
 
 /* Modal Content */
-.modal-content, .modal1-content {
+.modal-content {
   background-color: #fefefe;
   margin: auto;
   padding: 20px;
@@ -447,7 +447,7 @@ color: red;
                     </li>
 
                     <li>
-                            <a href="#" class="side-content">
+                            <a href="{{url_for('views.view', item='materials')}}" class="side-content">
                             <i class="fas fa-truck-pickup"></i>
                             <span class="nav-item">Materials</span></a>
                     </li>
@@ -463,7 +463,7 @@ color: red;
                                     <span class="nav-item">complaints agianst</span></a>
                     </li>
                         <li>
-                            <a href="#" class="side-content">
+                            <a href="{{url_for('views.view', item='history')}}" class="side-content">
                             <i class="fas fa-clock"></i>
                             <span class="nav-item">History</span></a>
                     </li>
@@ -499,8 +499,9 @@ color: red;
 			</span>
 			</div>
 	 </div>
-	 <div class="modal1" id="item-modal">
-	<div class="modal1-content">
+	 <div class="modal" id="item-modal">
+	<div class="modal-content">
+        <span class="close">&times;</span>
 	<div id="eq-modal">
 	<span><h2 align="center">Equipments</h2></span>
 	<div id="eq-item" class="eq-item">
@@ -515,8 +516,9 @@ color: red;
 
 	 </div>
 
-	<div class="modal1" id="update-modal">
-	<div class="modal1-content">
+	<div class="modal" id="update-modal">
+	<div class="modal-content">
+        <span class="close">&times;</span>
 	<div><h4 align="center">Pick an option to update</h4></div>
 	<div class="update-item">Change Price</div>
 	<div class="update-item">Change availability</div>
@@ -534,15 +536,21 @@ color: red;
 	<script>"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"</script>
         <script>
 
-	let modal = document.getElementById("equipmodal");
+	let modals = document.getElementsByClassName("modal");
 	let getequip = document.getElementById("getequip");
-	let span = document.getElementsByClassName("close")[0];
+	let spans = document.getElementsByClassName("close");
 	getequip.onclick = function() {
 		modal.style.display = "block";
 	}
 
-	span.onclick = function() {
-		modal.style.display = "none";
+	
+	for (span of spans) {
+	  span.onclick = function() {
+	    for (modal of modals) {
+	      if (modal.style.display !== "none")    
+	      	modal.style.display = "none";
+	    }
+	  }
 	}
 
 	window.onclick = function(event) {
@@ -574,16 +582,24 @@ color: red;
 		      dataType: "json",
 		      success: function (res) {
 			      console.log(res['e'], res['m']);
+			      $("#eq-item").empty();
+			      $("#mt-item").empty();
+			      if (res['e'].length > 0)
 			      res['e'].map((elem) => { console.log(typeof elem);
 				      let val = 'eq:' + type +':' + elem;
 				      let html = '<a href="{{url_for("views.access_api", end_point="loc", loc="arg")}}"><h4>'.replace("arg", val) + elem + '</h4></a>';
 				      console.log(html)
 				      $("#eq-item").append(html) });
+			      else
+                                $("#eq-item").append('<div align="center"><h4>No registered materials.</h4></div>');
 
+			      if (res['m'].length > 0)
 			      res['m'].map((elem) => { console.log(elem);
 				      let val = 'mt:' + type +':' + elem;
 				      let html = '<a href="{{url_for("views.access_api", end_point="loc", loc="arg")}}"><h4>'.replace("arg", val) + elem + '</h4></a>';
 				      $("#mt-item").append(html) } );
+			      else
+				$("#mt-item").append('<div align="center"><h4>No registered materials.</h4></div>'); 
 			       }
 			      });
 		      }

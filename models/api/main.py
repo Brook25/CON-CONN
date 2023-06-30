@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_restful import Api, Resource, reqparse, abort
 from models.engine import engine
 import json
+import math
 
 app = Flask(__name__)
 CORS(app, support_credentials=True)
@@ -107,32 +108,34 @@ class Reviews(Resource):
         return None
     
     def post(self, item_or_task):
-        print(item_or_task)
-        if item_or_task == "equipments":
-            print(request.json['uname'])
-            return json.dumps([{"name": "John", "review": "it was great. But the motor value of the thing should be working on the other side"},
-                                {"name": "James", "review": "it was great. But the techincal value of the thing should be working on the other side"}
-                                ])
-        elif item_or_task == "materials":
-            pass
+        if item_or_task != "add_review":
+            coll = 'MaterialSuppliers' if item_or_task == 'materials' else 'EquipmentSuppliers'
+            req = request.json
+            loc = req.get('loc').split('/')
+            loc_name, sub_city, city, name = loc[0], loc[1], loc[2], req.get('name')[:-2]
+            find = {'username': req.get('uname'), 'locations.name': loc_name, 'locations.city': city, 'locations.sub_city': sub_city, 'locations.items.name': name}
+            print()
+            query = engine.find({'coll': coll, 'find': find, 'fields': {'locations.items.reviews': 1, '_id': 0}})[0].get('locations')
+            print(query)
+            query = query[0].get('items')[0].get('reviews')
+            return json.dumps(query)
         
         else:
-            print(item_or_task)
             req = json.loads(request.get_json())
-            print(type(req), req)
             current_user = req.get('uname')
             supp = req.get('supp').split(':')
             supp_name = supp[0]
-            print(supp)
             loc = supp[1].split('/')
-            print(loc)
             name = supp[2]
-            print(name)
             rev = {"username": current_user, "review": req.get("rev")}
-            print(rev)
+            rat = int(req.get('rating'))
             coll = 'EquipmentSuppliers' if supp[-1][0] == 'e' else 'MaterialSuppliers'
-            engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[ln].items.$[it].reviews": rev}}, "array_filters": [{"ln.name": loc[0], "ln.sub_city": loc[1], "ln.city": loc[2]}, {"it.name": name}]})
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.not": f"You have successfully added a review" } } })
+            if rat:
+                rating = engine.find({'coll': coll, 'agg': [{'$match': {'username': supp_name }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.rating': 1, '_id': 0}} ] })[0]['locations']['items']['rating']
+            rating[0] = round(rating[0], 2)
+            new_rat = [(rating[0] + rat) / rating[1] + 1, rating[1] + 1]
+            engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[l].items.$[i].reviews": rev}, "$set": {"locations.$[l].items.$[i].rating": new_rat}}, 'array_filters': [{"l.name": loc[0], "l.city": loc[2], "l.sub_city": loc[1]}, {"i.name": name}] })
+            engine.update({'coll': 'User', 'row': {'username': current_user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": f"You have successfully added a review" } } })
             print("done")
             return None, 200
 

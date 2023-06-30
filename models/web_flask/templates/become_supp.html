@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
 
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
@@ -8,6 +14,132 @@
          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
 <style>
+
+
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  position: absolute;
+  display: block;
+  right: 10px;
+  float: right;
+  top: 15px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+
+
+/*.alert-modal {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%;
+  overflow: auto;
+  background-color: black;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.alert {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 7px;
+  font-size: 20px;
+  width: 30%;
+  height: 20%;
+}
+
+
+.alert-span {
+position: relative;
+left: 10%;
+}*/
+
+/*.alert-modal {
+width: 80%;
+height: 80%;
+opacity: 0.8;
+}
+
+.alert {
+background-color: white;
+position: absolute;
+width: 25%;
+height: 25%;
+left: 50%;
+right: 50%;
+top: 50%;
+transform:translate(-50%, -50%);
+border-radius: 5px;
+}*/
+
+.btn-close {
+position: absolute;
+right: 1px;
+top: 2px;
+height: 30px;
+}
+
 
 .container {
 position: relative;
@@ -25,6 +157,16 @@ top: 75px;
 
 
 <body>
+<nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+
+
 <form method="POST">
                 <!--<input type="text" id="locationinput" value="none"/>-->
         <div class="container" align="center">
@@ -95,11 +237,11 @@ top: 75px;
 		{% endfor %}
 		</div><br />
 		{% if 'new' in request.path %}
-		<div style="margin-top: 100px;">
+		<div style="margin-top: 20px; margin-left: 40px;">
 		<div>
 		<label>Contact Info (phone no)</label>
 		</div>
-		<input name="contactinfo" id="eq1price" value="none"/>
+		<input name="contactinfo" id="eq1price" value=""/>
 		</div>
 		{% endif %}
 		<div>
@@ -118,6 +260,23 @@ top: 75px;
 	</div>
                 <!--<input type="submit" value="Submit" name="Submit"/>-->
         </form>
+	<!--{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+	<div class="alert-modal" id="alert-modal">
+	<div class="alert">
+	<button type="button" class="btn-close" id="alert" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	{% if category == 'error' %}
+	<span class="alert-span">Item(s) hasn't been succefully registered</span><br />
+	<span class="alert-span">Please make sure you have properly filled out the form fields</span><br />
+	<i class="fa fa-close"></i>
+	{% else %}
+	<span class="alert-span">Registration succefully completed</span><br />
+	<i class="fa fa-check"></i>
+	{% endif %}			
+	</div>
+	</div>
+	{% endif %}			
+	{% endwith %}-->			
          <script>
         function updateCity() {
           let val = document.getElementById("city").value
@@ -135,8 +294,11 @@ top: 75px;
           document.getElementById("locationinput").value = val;
         }
 	
-
 	
+	let but = document.getElementById("alert").addEventListener("click", function () {
+        document.getElementById("alert-modal").style.display = none;
+	});
+
 	
 
 	/*var select = document.getElementById("equipment");
@@ -145,7 +307,6 @@ top: 75px;
 	    const selected = document.querySelectorAll('#equipment option:checked');
 	    const values = Array.from(selected).map(el => el.value);
 	    input.value = values.join(', ');*/
-	})
 
         </script>
 
@@ -208,9 +369,8 @@ top: 75px;
                     var subcity_name = $("#sub-city").val();
                     load_data('/sub-city', "locationData", subcity_name);
                 });
-
-
             });
+        
         </script>
 
 </body>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
 
 <style>
 
@@ -24,7 +26,8 @@
   margin: auto;
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  border-radius: 10px;
+  width: 60%;
 }
 
 
@@ -63,6 +66,77 @@
 .content-table tbody tr:last-of-type {
 	border-bottom: 2px solid #009879;
 }
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  display: block;
+  float: right;
+  top: 5px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
 
 
 .content-table tbody tr:hover {
@@ -79,6 +153,15 @@
 </style>
 	</head>
 	<body>
+		<nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+
 		<div align="center">
 			<div class="close-btn">&times;</div>
 			    <div>
@@ -117,6 +200,7 @@
 	{% if 'review' in request.args.get('loc') %}
 	<div class="modal" id="modal">
         	<div class="modal-content">
+                <span id="close" class="close">&times;</span>
         	<div id="review-title">
         	<span><h2 align="center">Reviews</h2></span>
 		</div>
@@ -140,6 +224,9 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 		<script>
+
+
+
 
 		/*async function get_reviews(url, data) {
 			let uname = data.uname;
@@ -201,7 +288,20 @@
 			/*document.getElementById("booksupplier").value = this.cells[2].innerHTML;*/
                       };
 
-   
+  
+        let span = document.getElementById("close");
+        span.onclick = function() {
+                modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+                  modal.style.display = "none";
+          }
+        }
+
+
+
 	if ({{request.args.get('loc') | tojson}}.includes('review')) {
 		$("tbody tr").click(function() {
    		$(this).addClass('selected').siblings().removeClass('selected');

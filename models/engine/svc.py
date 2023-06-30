@@ -54,6 +54,7 @@ class DBEngine:
         coll = classes[dct['coll']]
         print(coll)
         supp = coll.objects(username=dct['username']).first()
+        print(supp)
         if supp:
             dct['username'] = supp
             loc = supp.locations.filter(**(dct['filter'])).first()
@@ -84,6 +85,7 @@ class DBEngine:
                 loc = MLocation(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=mt)
                 dct = {'username': dct['username'], 'locations': [loc], 'contact_info': [dct['contact_info']] }
                 self.add_new({'coll': 'MaterialSuppliers', 'docs': dct})
+                
 
 
     def find(self, dct):
@@ -170,7 +172,7 @@ class DBEngine:
 #dctjn = { 'username': "John", "email": "john1234@gmail.com", "password": "john1234" }
 
 
-#dct1 = {'username': 'Tom', 'locations': [{"name": "Tor-hailoch", "city": "Addis", "sub_city": "Kolfe", 'items': [{"machine": "Mixer", "name": "Mixer1", "years_used": 6, "price": 500}, {"machine": "Vibrator", "name": "Vibrator1", "years_used": 4, "price": 1000}, {"machine": "Excavator", "name": "Excavator1", "years_used": 3, "price": 1500}]}]}
+#dct1 = {'username': 'Tom', 'locations': [{"name": "tor-hailoch", "city": "Addis", "sub_city": "Kolfe", 'items': [{"machine": "Mixer", "name": "Mixer1", "years_used": 6, "price": 500}, {"machine": "Vibrator", "name": "Vibrator1", "years_used": 4, "price": 1000}, {"machine": "Excavator", "name": "Excavator1", "years_used": 3, "price": 1500}]}]}
 
 
 

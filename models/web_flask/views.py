@@ -25,9 +25,10 @@ def home():
 @views.route('/query/<string:item>', methods=["POST", "GET"])
 def query(item):
     query = json.loads(request.args.get('query1'))
+    print(query)
     #print(query[0]['locations']['items'])
     loc = request.args.get('loc').split('/')
-    loc = {"name": loc[1], "sub_city": loc[2], "city": loc[3]}
+    loc = {"name": loc[0], "sub_city": loc[1], "city": loc[2]}
     if request.method == "POST":
         bookings = request.form.get('supp')
         if bookings:
@@ -70,7 +71,7 @@ def welcome():
         sub_city = request.form.get('sub-city')
         location = request.form.get('location')
         equipment = request.form.get('equipment') 
-        return redirect(url_for('views.query', query=query))
+        return redirect(url_for('views.query', query=query, loc=loc))
         
 
         #print(city, sub_city, location, equipment)
@@ -111,6 +112,7 @@ def equipments():
 @views.route('/book/<string:item>', methods=["POST", "GET"])
 @login_required
 def book(item):
+    uname = current_user.username
     equipments = ["Mixer", "Vibrator", "Compactor", "Excavator"]
     materials = ["Sand", "Steel", "Aggregate", "Cement"]
 
@@ -125,9 +127,9 @@ def book(item):
         sub_city = request.form.get('sub-city').split('/')[1]
         location = request.form.get('location')
         equipments = request.form.get('equipment').split(', ')
-        query1 = engine.find({'coll': coll, 'agg': [{"$unwind": "$locations"}, {"$unwind": "$locations.items"}, {"$match": {"locations.name": location, "locations.city": city, "locations.sub_city": sub_city, f"locations.items.{selector}": { "$in": equipments } } }, {"$project": {"_id": 0, "username": 1, "locations.items": 1, "contact_info": 1} }] })
+        query1 = engine.find({'coll': coll, 'agg': [ {"$match": {"username": {"$not": {"$eq": uname}}}}, {"$unwind": "$locations"}, {"$unwind": "$locations.items"}, {"$match": {"locations.name": location, "locations.city": city, "locations.sub_city": sub_city, f"locations.items.{selector}": { "$in": equipments }, "locations.items.available": True } }, {"$project": {"_id": 0, "username": 1, "locations.items": 1, "contact_info": 1} }] })
         print(city, sub_city, location, equipments)
-        loc = f"{item}/{location}/{sub_city}/{city}"
+        loc = f"{location}/{sub_city}/{city}"
         return redirect(url_for('views.query', item=item, query1=json.dumps(query1), loc=loc, days=request.form.get('days')))
     if item == 'equipment':
         items = ('Equipment(s)', equipments)
@@ -143,29 +145,31 @@ def register(type, item):
     equipments = ["Mixer", "Vibrator", "Compactor", "Excavator"]
     materials = ["Sand", "Steel", "Aggregate", "Cement"]
     if request.method == "POST":
-        coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
         form = request.form
-        city = form.get('city')
-        sub_city = form.get('sub-city').split('/')[1]
-        location = form.get('location')
-        it_lst = [x for x in ['it1', 'it2', 'it3'] if form.get(x)]
-        values = []
-        for it in it_lst:
-            val = {'price': form.get(f'{it}-price'), 'name': form.get(it)}
-            if item == "equipment":
-                val['years_used'] = form.get(f'{it}-yused')
-                val['machine'] = form.get(it)
-            values += [val]
-        uname = current_user.username        
-        dct = {"coll": coll, 'username': uname, 'filter':
-                {'name': location, 'sub_city': sub_city,
-                'city': city}, 'append': values}
-        print(dct)
-        if type == 'new':
-            dct['contact_info'] = form.get('contactinfo')
-        engine.append_or_create(dct)
-        return "<h1>Done</h1>"
-        #return redirect(url_for('views.query', query1=json.dumps(query1), loc=loc))
+        coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
+        try:
+            city = form.get('city')
+            sub_city = form.get('sub-city').split('/')[1]
+            location = form.get('location')
+            it_lst = [x for x in ['it1', 'it2', 'it3'] if form.get(x)]
+            values = []
+            for it in it_lst:
+                val = {'price': form.get(f'{it}-price'), 'name': form.get(it)}
+                if item == "equipment":
+                    val['years_used'] = form.get(f'{it}-yused')
+                    val['machine'] = form.get(it)
+                values += [val]
+            uname = current_user.username        
+            dct = {"coll": coll, 'username': uname, 'filter':
+                    {'name': location, 'sub_city': sub_city,
+                    'city': city}, 'append': values}
+            if type == 'new':
+                dct['contact_info'] = form.get('contactinfo')
+            engine.append_or_create(dct)
+            flash(f"succefully submitted", category="success")                
+        except:
+            flash("Data not succesfully submitted", category="error")
+        return redirect(request.url)
     if item == 'equipment':
         items = ('Equipment', equipments)
         #print(request.args.get('item'))
@@ -212,7 +216,7 @@ def access_api(end_point):
                 change = change[:-2].split(', ')
                 data = json.dumps({'uname': user, 'detail': detail[0], 'change': change})
                 res = json.loads(requests.delete(url + f'item/{item}', json=data).json())
-                print(res)
+                #print(res)
                 return "Done"
             ep = ep.split('_')[1]
             if 'Price' in ep:
@@ -257,30 +261,29 @@ def access_api(end_point):
 
 @views.route('/view/<string:item>')
 def view(item):
-    uname = current_user.username
+    find = {'username': current_user.username}
     if item == 'bookings':
-        bookings = engine.find({'coll': 'User', 'find': {'username': uname}, 'fields': {'equipment_bookings': 1, 'material_bookings': 1, '_id': 0} })[0]
+        bookings = engine.find({'coll': 'User', 'find': find, 'fields': {'equipment_bookings': 1, 'material_bookings': 1, '_id': 0} })[0]
         bookings['material_bookings'].extend(bookings['equipment_bookings'])
         bookings = bookings['material_bookings']
         data=bookings
         print(data)
     elif item == 'equipments' or item == 'materials':
         coll = 'EquipmentSuppliers' if item[0] == 'e' else 'MaterialSuppliers'
-        locs = engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {'locations': 1, '_id': 0} })[0]['locations']
-        for loc in locs:
+        data = engine.find({'coll': coll, 'find': find, 'fields': {'locations': 1, '_id': 0} })[0]['locations']
+        for loc in data:
             loc['name'] += '/' + loc['sub_city'] + '/' + loc['city']
             loc.pop('city', None)
             loc.pop('sub_city', None)
-        print(locs)        
+        print(data)        
 
     elif item == "history":
-        pass
-        #TODO: query history
+        data = engine.find({'coll': 'User', 'find': find, 'fields': {'history': 1, '_id': 0} })[0]['history']
+        print(data)
     elif item == "booked":
         pass
         #TODO: optional
-    
-    return "Done"
+    #return "Done"
     return render_template('bookings_and_items.html', data=data)
 
 

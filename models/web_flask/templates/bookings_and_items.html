@@ -92,29 +92,68 @@
 				 <table class="content-table" id="table">
 				<thead>
 				<tr>
+				<th>Location </th>
+				{%if 'bookings' in request.path or 'history'  in request.path %}
+                                <th>Supplier </th>
+                                {% endif %}
+				{%if 'equipments' in request.path %}
 				<th>Machine </th>
+				{% endif %}
+				 {%if 'bookings' in request.path or 'history' in request.path %}
+                                <th>Type</th>
+				{% endif %}
 				<th>Name </th>
+				{%if 'equipments' in request.path %}
 				<th>Years used </th>
+				{% endif %}
+				{%if 'equipments' in request.path or 'materials'  in request.path %}
+				<th>Available </th>
 				<th>Rating </th>
+				{% else %}
+				<th>Date Booked</th>
+				<th>Date Returned</th>
+				{% endif %}
 				</tr>
 				</thead>
+				{%if 'equipments' in request.path or 'materials'  in request.path %}
 				<tbody>
-				{% for item in items %}
+				{% for item in data %}
+				{% for val in item['items']%}
 				<tr>
-				<td>{{item.machine}}</td>
-				<td>{{item.name}}</td>
-				<td>{{item.years_used}}</td>
-				<td>{{item.rating}}</td>
+				<td>{{ item.name }}</td>
+				{%if 'equipments' in request.path %}
+				<td>{{val.machine}}</td>
+				{% endif %}
+				<td>{{val.name}}</td>
+				{%if 'equipments' in request.path %}
+                                <td>{{val.years_used}}</td>
+                                {% endif %}
+				<td>{{val.available}}</td>
+				<td>{{val.rating}}</td>
+				{% endfor %}
 				</tr>
 				{% endfor %}
+				{% else %}
+				<tbody>
+				{% for item in data %}
+				</tr>
+				<td>{{ item.location }}</td>
+				<td>{{item.username}}</td>
+				<td>{{item.item}}</td>
+				<td>{{item.name}}</td>
+				<td>{{item.date}}</td>
+				<td>{{item.return_date}}</td>
+				{% endfor %}
+				</tr>
 				</tbody>
+				{% endif %}
 			</table>
 
 		</div>
 			      </div>
 			    </div>
 		</div>
-	{% if 'review' in request.args.get('loc') %}
+	<!--{% if 'equipments' in request.path %}
 	<div class="modal" id="modal">
         	<div class="modal-content">
         	<div id="review-title">
@@ -135,66 +174,10 @@
 	</div>
 	</div>
 	</form>
-	{% endif %}
+	{% endif %}-->
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-		<script>
-
-
-                let table = document.getElementById('table');
-		let inputElem = document.getElementById("booksupplier");
-		let modal = document.getElementById('modal');
-		for(let i = 1; i < table.rows.length; i++)
-                  {
-                    table.rows[i].onclick = function()
-                      {
-			   let machine_name = this.cells[1].innerHTML;
-			 if ( {{ request.args.get('loc') | tojson }}.includes('review') ) {
-			   let uname = {{ data[0] | tojson }};
-			   let loc = {{ data[1] | tojson }};
-			   let items = JSON.parse('{{ items | tojson }}')
-			   let review_div = document.getElementById("reviews");
-			   let val = items.find((elem) => elem['name'] === machine_name);
-			   val['reviews'].map((elem) => {
-                           html = '<span>' + '<h3>@' + elem['username'] + ' said: ' +  '<i>"' +  elem['review'] + '"</i>' + '</h3>' + '</span>';
-                          review_div.innerHTML += html;
-                        });
-			   modal.style.display = "block";
-		      }
-
-			else {
-			  let del_input = document.getElementById('input');
-				if ( del_input.value.includes(machine_name + ', ') ) { 
-			  del_input.value = del_input.value.replace(machine_name  + ', ', '');
-			}
-			else
-			  del_input.value += machine_name + ', ';			 
-			}
-
-		      }
-                      };
-
-   
-	if ({{request.args.get('loc') | tojson}}.includes('review')) {
-		$("tbody tr").click(function() {
-   		$(this).addClass('selected').siblings().removeClass('selected');
-        	console.log('selected');
-	});
-}
-		else {
-		$("tbody tr").click(function() {
-                  if ($(this).hasClass('selected')) {
-                        $(this).removeClass('selected');
-
-                  }
-                  else {
-                    $(this).addClass('selected');
-                  }
-                });
-}
-
-        	</script>
 
 	</body>
 </html>

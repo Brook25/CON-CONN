@@ -53,5 +53,6 @@ class register_form(FlaskForm):
         if collec.find_one({'username': username.data}):
             raise ValidationError("Username already taken!")
 
+    
 
 #volcano27!
