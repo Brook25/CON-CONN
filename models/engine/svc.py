@@ -52,9 +52,7 @@ class DBEngine:
 
     def append_or_create(self, dct):
         coll = classes[dct['coll']]
-        print(coll)
         supp = coll.objects(username=dct['username']).first()
-        print(supp)
         if supp:
             dct['username'] = supp
             loc = supp.locations.filter(**(dct['filter'])).first()
@@ -67,12 +65,14 @@ class DBEngine:
                     names = [x['name'] for x in filter if x]
                     dct['append'] = [x for x in dct['append'] if x['name'] not in names]
                     Material.append(dct)
+                return [x['name'] for x in dct['append']]
             else:
                 if dct['coll'][0] == "E":
                     self.equipment_count(dct['append'])
                     ELocation.append(dct)
                 else:
                     MLocation.append(dct)
+            return [x['name'] for x in dct['append']]
         else:
             if dct['coll'][0] == "E":
                 self.equipment_count(dct['append'])
@@ -85,6 +85,8 @@ class DBEngine:
                 loc = MLocation(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'], items=mt)
                 dct = {'username': dct['username'], 'locations': [loc], 'contact_info': [dct['contact_info']] }
                 self.add_new({'coll': 'MaterialSuppliers', 'docs': dct})
+        return [x['name'] for x in dct['append']]
+            
                 
 
 
@@ -123,17 +125,6 @@ class DBEngine:
             coll.update_one(row, update, array_filters=dct['array_filters'], upsert=False)
 
     
-
-    def init_validate(self, obj_dict):
-        doc = list(obj_dict.keys())[0]
-        print(doc)
-        for k, v in classes.items():
-            if k == doc:
-                obj = v(**list(obj_dict.values())[0])
-                obj.validate()
-                print("OK")
-                break
-
 
 
 

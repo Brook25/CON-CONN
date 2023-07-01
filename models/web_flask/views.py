@@ -165,7 +165,11 @@ def register(type, item):
                     'city': city}, 'append': values}
             if type == 'new':
                 dct['contact_info'] = form.get('contactinfo')
-            engine.append_or_create(dct)
+            items = engine.append_or_create(dct)
+            for i in range(len(it_lst)):
+                filename = f"{uname}/{location}/{sub_city}/{city}/{items[i]}"
+                f = request.files[f'{it_lst[i]}creds']
+                f.save(os.path.join('static/images/validation/{item}', filename))
             flash(f"succefully submitted", category="success")                
         except:
             flash("Data not succesfully submitted", category="error")

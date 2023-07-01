@@ -19,6 +19,7 @@ class MLocation(mongoengine.EmbeddedDocument):
                items=items)
         dct['username'].locations.append(loc)
         dct['username'].save()
+        return items
 
 
 class ELocation(MLocation):
