@@ -17,8 +17,8 @@ class MLocation(mongoengine.EmbeddedDocument):
         items = [coll(**(it)) for it in dct['append']]
         loc = cls(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'],
                items=items)
-        dct['username'].locations.append(loc)
-        dct['username'].save()
+        dct['user'].locations.append(loc)
+        dct['user'].save()
         return items
 
 

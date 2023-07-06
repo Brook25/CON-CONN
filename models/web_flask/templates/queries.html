@@ -3,6 +3,8 @@
 	<head>
 	 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
 <style>
 
@@ -210,15 +212,15 @@ text-align: center;
 				<td>{{ supp.locations['items']['machine']}}</td>
 				<td>{{supp.locations['items']['years_used']}}</td>
 				{% endif %}
-				<td>{{supp.locations['items']['rating']}}</td>
+				<td>{{supp.locations['items']['rating'][0]}}</td>
 				<td>{{supp.contact_info}}</td>
 				</tr>
 				{% endfor %}
 				</tbody>
 			</table>
 			<form method="POST">
-			<input type="text" id="booksupplier" name="supp" value=""/>
-			<input type="text" id="booksupplier" name="supp" value="{{location}}"/>
+			<input type="hidden" id="booksupplier" name="supp" value=""/>
+			<input type="hidden" id="booksupplier" name="supp" value="{{location}}"/>
 			<button type="submit" class="btn btn-primary" align="center">Submit</button>
 			</form>
 		</div>

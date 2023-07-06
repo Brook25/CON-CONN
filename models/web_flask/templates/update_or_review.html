@@ -209,7 +209,7 @@ left: 45%;
 				{% if 'eq' in request.args.get('loc')%}
 				<td>{{item.years_used}}</td>
 				{% endif %}
-				<td>{{item.rating}}</td>
+				<td>{{item.rating[0]}}</td>
 				</tr>
 				{% endfor %}
 				</tbody>

@@ -53,6 +53,7 @@ body {
   display: inline-block;
   position: relative;
   line-height: 40px;
+  text-align: center;
   margin: 0px 5px;
 }
 
@@ -256,6 +257,7 @@ h1{
   color: white;
   width: 24px;
   height: 24px;
+  text-align: center;
   font-size: 12px;
   border-radius: 50%;
 }
@@ -554,7 +556,7 @@ color: red;
 	<div class="update-item">Change location</div>
 	</div>
 	</div>
-	<div class="not-modal">
+	<div class="not-modal" id="not-modal">
 	</div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
@@ -583,11 +585,14 @@ color: red;
 	}
 
 	window.onclick = function(event) {
-	  if (event.target == modal) {
-		  modal.style.display = "none";
+	  for (modal of modals) {
+	    if (event.target == modal) {
+	      modal.style.display = "none";
+	    }
 	  }
 	}
-	options = document.getElementsByClassName("modal-option");
+
+	/*options = document.getElementsByClassName("modal-option");
 	console.log(options[0].innerHTML);
 	for (let i = 0; i < options.length; i++) {
 	  options[i].onclick = function() {
@@ -598,7 +603,7 @@ color: red;
 
 	$(".modal-option").click(function() {
 		console.log($(this).innerHTML)
-		$(this).addClass('modal-selected').siblings().removeClass('modal-selected'); });		
+		$(this).addClass('modal-selected').siblings().removeClass('modal-selected'); });*/		
 	
 	</script>
 	<script>
@@ -699,6 +704,12 @@ color: red;
 	    
 	}	
 
+	let not_modal = document.getElementById("not-modal");
+	let body = document.getElementsByTagName('body')[0];
+	window.onclick = function(event) {
+	    if (event.target == body)
+	      not_modal.style.display = "none";
+	}
 	</script>
 
 </body>

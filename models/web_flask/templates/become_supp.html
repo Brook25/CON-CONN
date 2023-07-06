@@ -152,7 +152,25 @@ position: relative;
 top: 40px;
 }
 
+.message {
+  position: absolute;
+  display: block;
+  left: 30%;
+  width: 30%;
+  height: 100px;
+  padding: 0;
+  margin: 0;
+  background-color: #99FF66;
+  font-size: 15px;
+  text-align: center;
+}
 
+.message span {
+  position: relative;
+  right: 5px;
+  float: right;
+  cursor: pointer;
+}
 </style>
 
 
@@ -163,6 +181,23 @@ top: 40px;
 
 
 <body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+{% if category == 'error' %}
+<div class="message" id="message" style="background-color: #FFCCCB;">{{request.path.split('/')[-1]}} not successfully registered<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+<div>Please fill the fields properly, and resubmit the form</div>
+</div>
+{% else %}
+<div class="message" id="message" style="background-color: #adff29;">{{request.path.split('/')[-1]}} successfully registered<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+
 <nav class="nav1">
                   <ul class="nav_links">
                           <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
@@ -314,6 +349,13 @@ top: 40px;
 	});
 
 	
+	function CloseMessage() {
+	  let message_box = document.getElementById('message');
+	  message_box.style.display = 'none';
+	}
+
+
+
 
 	/*var select = document.getElementById("equipment");
 	var input = document.getElementById("equipmentinput");

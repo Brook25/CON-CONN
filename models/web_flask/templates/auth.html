@@ -1,16 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <form action="{{ request.path }}" method="POST", class="...">
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="alert alert-{{category}} alert-dismissable fade show" role="alert">
-{{  message }}
-<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
+<div class="form-div">
+{% if request.path != '/sign-up/' %}
+<h3 align="center">Log In</h3>
 {% endif %}
-{% endwith %}
 {% if request.path == '/sign-up/' %}
 <h3 align="center">Sign Up</h3>
 <div class="form-group">
@@ -39,8 +33,8 @@
 </div>
 <div class="form-group">
   <label for="password">Password</label>
-{{ form.password(class_="form-control", placeholder="password") }}
-{% for error in form.password.errors %}
+{{ form.pwd(class_="form-control", placeholder="password") }}
+{% for error in form.pwd.errors %}
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
 {{ error }}
 <button type="button" class="close" data-bs-dismiss="alert">
@@ -62,6 +56,7 @@
 {% endfor %}
 {% endif %}</br>
 <button type="submit" class="btn btn-primary">Submit</button>
+</div>
 <p align="center">
 {% if request.path != '/sign-up/' %}
 New here?
@@ -73,3 +68,13 @@ Already have an account?</br>
 </p>
 {% endblock %}
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{category}} alert-dismissable fade show" role="alert">
+{{  message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}

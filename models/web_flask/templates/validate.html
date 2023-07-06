@@ -1,0 +1,265 @@
+<!DOCTYPE>
+<html>
+<head>
+	<!--<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:500"/>
+	<link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+      />-->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      crossorigin="anonymous"
+      />
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <style>
+
+.nav1 {
+  background: #0082e6;
+  height: 80px;
+  width: 100%;
+}
+
+
+.nav1 .nav_links {
+  float: right;
+  margin-right: 20px;
+}
+
+
+.nav1 .nav_links .nav_item {
+  display: inline-block;
+  line-height: 80px;
+  margin: 0px 5px;
+}
+
+.nav1 .nav_links .nav_item .nav_x{
+  color: white;
+  font-size: 17px;
+  padding: 7px;
+  border-radius: 3px;
+  /*text-transform: uppercase;*/
+
+}
+.content-table {
+        border-collapse: collapse;
+        margin: 25px 0;
+        font-size: 0.9em;
+        min-width: 400px;
+        border-radius: 5px 5px 0 0;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+  background-color: #009879;
+  color: black;
+  font-weight: bold;
+  text-align: left;
+}
+
+.content-table th,
+.content-table td {
+  padding: 12px 15px;
+}
+
+
+.content-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.content-table tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+        border-bottom: 2px solid #009879;
+}
+
+
+.content-table tbody tr:hover {
+  background-color: #ffff99;
+}
+
+
+.content-table .selected {
+  /*background-color: rgba(41, 103, 182, 0.89);*/
+  color: #ff0000;
+}
+
+.img-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* Modal Content */
+.img {
+  position: absolute;
+  left: 25%;
+  width: 100%;
+  height:  100%;
+}
+
+img {
+  width: 50%;
+  height: 50%;
+}
+
+#accept {
+  position: absolute;
+  top: 70%;
+  left: 40%;
+  width: 80px;
+  color: white;
+  height: 25px;
+  border-radius: 5px;
+  background-color: blue;
+}
+
+#decline {
+  position: absolute;
+  top: 70%;
+  left: 55%;
+  width: 80px;
+  color: white;
+  height: 25px;
+  border-radius: 5px;
+  background-color: red;
+}
+
+#accept:hover, #decline:hover {
+  background-color: yellow;
+  color: black;
+}
+
+
+.message {
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  background-color: #99FF66;
+  font-size: 20px;
+  text-align: center;
+}
+
+.message span {
+  position: relative;
+  right: 5px;
+ float: right;
+}
+
+  </style>
+</head>
+<body>
+	{% with message = get_flashed_messages(with_categories=true) %}
+	{% if message %}
+	{% for m, category in message %}
+	<div class="message">{{category}}<span>&times;</span> </div>
+	{% endfor %}
+	{% endif %}
+	{% endwith %}
+
+	<div align="center">
+			    <div class="modal-dialog">
+			      <div>
+			      <div>
+			        <h4 class="modal-title">
+				Validation list for {{ request.path.split('/')[-1] }}
+				</h4>
+			      </div>
+			      <div class="modal-body">
+				 <table class="content-table" id="table">
+				<thead>
+				<tr>
+				<th>Supplier name </th>
+				{%if 'item' in request.path %} 
+				<th>Location </th>
+				<th>Type </th>
+				<th>Name </th>
+				{% endif %}
+				</tr>
+				</thead>
+				<tbody>
+				{% for v in  validate%}
+				<tr>
+				<td>{{v.username}}</td>
+				{%if 'item' in request.path %} 
+				<td>{{v.location}}</td>
+				<td>{{v.item}}</td>
+				<td>{{v.name}}</td>
+				{% endif %}
+				</tr>
+				{% endfor %}
+				</tbody>
+				 </table>
+			      </div>
+			     </div>
+			    </div>
+			  </div>
+			<div class="img-modal" id="img-modal">
+			<div class="img" id="img">
+			</div>
+			<form method="POST">
+			<input type="hidden" id="input" name="input" value=""/>
+			<button id="accept" type="submit" class="btn btn-primary" align="center">Accept</button>
+			<button id="decline" type="submit" class="btn btn-primary" align="center">Decline</button>
+			</form>
+			</div>
+			<script>
+			let table = document.getElementById("table");
+			let img_modal = document.getElementById("img-modal");
+			let img = document.getElementById("img");
+			for (let row of table.rows) {
+			  row.onclick = function() {
+			    let loc = row.cells[1].innerHTML.replace('/', '_').replace('/', '_');
+			    let file_name = `${row.cells[0].innerHTML}_${loc}_${row.cells[3].innerHTML}.jpg`;
+			    console.log(file_name);
+			    let item;
+			    if (JSON.parse('{{request.path | tojson}}').includes('supplier'))
+			      item = 'supplier';
+			    else
+			      item = JSON.parse('{{ validate[0]["item"] | tojson}}')
+			    img.innerHTML = `<img src="/static/images/verification/${item}/${file_name}"/>`;
+			    img_modal.style.display = "block";
+			  }
+			}
+			let buttons = document.querySelectorAll('button');
+			let input = document.getElementById("input");
+			for (let butt of buttons) {
+			  butt.onclick = function() {
+			    console.log('hello');
+			    if (butt.innerHTML === 'Accept')
+			      input.value += ':accept';						            else
+			      input.value += ':decline';
+			  }
+			}
+			window.onclick = function(event) {
+			  if (event.target == img_modal || event.target == img)
+			    img_modal.style.display = "none";
+			}
+			
+			</script>
+</body>
+</html>

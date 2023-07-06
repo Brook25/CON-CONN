@@ -5,7 +5,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from .forms import register_form, login_form
 from models.engine import setup_connection
 from models.data.users import User
-
+from passlib.hash import sha256_crypt
 
 
 auth = Blueprint('auth', __name__)
@@ -17,7 +17,6 @@ def login():
     form = login_form(meta={'csrf': False})
     if request.method == 'POST':
         if form.validate_on_submit():
-            flash(f"Successfully Logged in!", "success")
             user = User.objects(email=form.email.data).first()
             login_user(user)
             return redirect(url_for('views.welcome'))
@@ -33,19 +32,17 @@ def logout():
 def sign_up():
     form = register_form(meta={'csrf': False})
     if request.method == 'POST':
-        print('Hello')
-        print(form.validate_on_submit())
         if form.validate_on_submit():
-            print('Hallo')
             try:
                 email = form.email.data
                 password = form.pwd.data
+                password = sha256_crypt.encrypt(password)
                 username = form.username.data
                 User(email=email, password=password, username=username).save()
-                flash(f"Account successfly created", "success")
+                flash(f"Account successfly created", category="success")
                 return redirect(url_for('auth.login'))
             except Exception as e:
-                flash(e, "danger")
+                flash(e, category="error")
     return render_template("auth.html", form=form)
 
 

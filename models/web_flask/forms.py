@@ -15,11 +15,12 @@ from flask_login import current_user
 from wtforms import ValidationError, validators
 from models.data.users import User
 from models.engine import setup_connection
+from passlib.hash import sha256_crypt
 
 
 class login_form(FlaskForm):
     email = StringField(validators=[InputRequired(), Email(), Length(6, 64)])
-    password = PasswordField(validators=[InputRequired(), Length(min=8, max=72)])
+    pwd = PasswordField(validators=[InputRequired(), Length(min=8, max=72)])
     #username = StringField(validator=[InputRequired()])
 
     def validate_email(self, email):
@@ -27,9 +28,9 @@ class login_form(FlaskForm):
         if not collec.find_one({'email': email.data}):
             raise ValidationError('Account not found')
 
-    def validate_password(self, password):
-        collec = User._get_collection().find_one({'email': self.email.data})
-        if collec and password.data != collec['password']:
+    def validate_password(self, pwd):
+        doc = User._get_collection().find_one({'email': self.email.data})
+        if doc and not sha256_crypt.verify(pwd.data, doc['password']):
             raise ValidationError('Wrong password')
 
 class register_form(FlaskForm):

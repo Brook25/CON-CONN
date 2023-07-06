@@ -3,6 +3,8 @@
 	<head>
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
 <style>
 
@@ -153,7 +155,10 @@ text-align: center;
   /*background-color: rgba(41, 103, 182, 0.89);*/
   color: #ff0000;
 }
-
+.btn {
+position: relative;
+left: 48%;
+}
 
 </style>
 	</head>
@@ -217,10 +222,10 @@ text-align: center;
 	<form method="POST">
 	<div>
 	<div>
-	<input name="data" id="input"/>
+	<input type="hidden" name="data" id="input"/>
 	</div>
 	<div>
-	<button>Submit</button>
+	<button type="submit" class="btn btn-primary" align="center">Submit</button>
 	</div>
 	</div>
 	</form>
@@ -294,18 +299,18 @@ text-align: center;
                       };
 
   
+	if (JSON.parse('{{request.args.get('loc') | tojson}}').includes('review') ) {
         let span = document.getElementById("close");
         span.onclick = function() {
                 modal.style.display = "none";
-        }
+          }
 
         window.onclick = function(event) {
           if (event.target == modal) {
                   modal.style.display = "none";
+            }
           }
-        }
-
-
+	}
 
 	if ({{request.args.get('loc') | tojson}}.includes('review')) {
 		$("tbody tr").click(function() {

@@ -3,9 +3,73 @@
 	<head>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
 
+	 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
 
 <style>
 
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  display: block;
+  float: right;
+  top: 5px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
 
 .modal {
   display: none; /* Hidden by default */
@@ -159,11 +223,34 @@ input {
   color: #2ddc76;
 }
 
+.empty {
+  position: absolute;
+  top: 20%;
+  left: 36%;
+}
+
+
+#sad {
+  position: absolute;
+  color: crimson;
+  top: 200px;
+  left: 45%;
+  font-size: 40px;
+}
 
 </style>
 	</head>
 	<body>
+		 <nav class="nav1">
+                  <ul class="nav_links">
+			  <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+		 </nav>
 		<div align="center">
+		{% if history %}
 			<div class="close-btn">&times;</div>
 			    <div>
 			      <div>
@@ -200,6 +287,10 @@ input {
 		</div>
 			      </div>
 			    </div>
+		 {% else %}
+                <div class="empty"><h4>Sorry, Nothing to show for now. Come back later</h4></div>
+		<div><i id="sad" class="fas fa-sad-cry"></i></div>
+                {% endif %}
 		</div>
 	<div class="modal" id="modal">
         	<div class="modal-content">

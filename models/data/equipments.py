@@ -8,7 +8,7 @@ class Equipment(Material):
     @classmethod
     def append(self, dct):
         equipments = [Equipment(**(eq)) for eq in dct['append']]
-        loc = dct['username'].locations.filter(**(dct['filter'])).first()
+        loc = dct['user'].locations.filter(**(dct['filter'])).first()
         print(loc, loc.to_mongo())
         [loc.items.append(eq) for eq in equipments]
-        dct['username'].save()
+        dct['user'].save()

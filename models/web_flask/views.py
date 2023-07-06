@@ -6,6 +6,7 @@ from models.engine import engine
 from models.data.users import User
 import json
 import requests
+import os
 
 
 
@@ -30,6 +31,7 @@ def query(item):
     loc = request.args.get('loc').split('/')
     loc = {"name": loc[0], "sub_city": loc[1], "city": loc[2]}
     if request.method == "POST":
+        print('hello')
         bookings = request.form.get('supp')
         if bookings:
             bookings = bookings[:-2].split(', ')
@@ -40,18 +42,19 @@ def query(item):
 
             print(book, details, bookings, loc, item)
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$set": { "locations.$[ln].items.$[it].available": False } }, "array_filters": [ {"ln.name": loc['name'], "ln.city": loc['city'], "ln.sub_city": loc['sub_city'] }, {"it.name": details[1]} ] })
-            engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$set": {"notifications.not": f"One of your {item}s has been booked"} } })
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"One of your {item}s have been booked"], "$position": 0 } } } })
             
             days = 1 if item == 'material' else int(request.args.get('days'))
             booking = {"username": details[0], "location": ('/').join(loc.values()), 'item': item , "name": details[1], 'date': datetime.utcnow()}
             booking['return_date'] = booking['date'] + timedelta(days=days)
             booked = booking.copy()
             booked["username"] = uname
+            print(booking)
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {"$push":  {f"{item}_bookings": booking } } } )
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$push":  {f"booked_{item}s": booked } } })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": f"You have successfully booked a {item}" } } })
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"You have successfully booked a {item}"], "$position": 0 } } } })
         flash(f"Equipment succesfully booked", "success")
-        return "<h1>Done!<\h1>"
+        return redirect(url_for('views.book', item=item))
         #return redirect(url_for("views.welcome"))
     print(query)
     return render_template("queries.html", query=query)
@@ -147,32 +150,50 @@ def register(type, item):
     if request.method == "POST":
         form = request.form
         coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
+        city = form.get('city')
+        sub_city = form.get('sub-city').split('/')[1]
+        location = form.get('location')
+        it_lst = [x for x in ['it1', 'it2', 'it3'] if form.get(x)]
+        uname = current_user.username        
+        values = []
         try:
-            city = form.get('city')
-            sub_city = form.get('sub-city').split('/')[1]
-            location = form.get('location')
-            it_lst = [x for x in ['it1', 'it2', 'it3'] if form.get(x)]
-            values = []
+            for it in it_lst:
+                if not (form.get(f'{it}-price') and form.get(f'{it}-price').isdigit()):
+                    raise ValueError(f"Price not properly filled for item {it[-1]}")
+                if item == 'equipment' and not (form.get(f'{it}-yused') and form.get(f'{it}-yused').isdigit()):
+                    raise ValueError(f"Years used not properly filled for item {it[-1]}")
+            if type == 'new':
+                if not (form.get('contactinfo') and  form.get('contactinfo')[:2] == '09' and form.get('contactinfo').isdigit() and len(form.get('contactinfo')) == 10):
+                    raise ValueError(f"contact info not properly provided. please check the fileds corresponding to your contact info.")
+                if engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {}}):
+                    raise ValueError(f"You are already registered as {item} Supplier, please use Add {item} option on the home page.")
+            if type == 'add' and not engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {}}):
+                    raise ValueError(f"You aren't registered as {item} Supplier yet, please use Become {item} supplier option on the home page.")
             for it in it_lst:
                 val = {'price': form.get(f'{it}-price'), 'name': form.get(it)}
                 if item == "equipment":
                     val['years_used'] = form.get(f'{it}-yused')
                     val['machine'] = form.get(it)
                 values += [val]
-            uname = current_user.username        
             dct = {"coll": coll, 'username': uname, 'filter':
                     {'name': location, 'sub_city': sub_city,
                     'city': city}, 'append': values}
             if type == 'new':
                 dct['contact_info'] = form.get('contactinfo')
             items = engine.append_or_create(dct)
+            if not items:
+                raise ValueError("Similar materials can't be registerd in the same location.")
             for i in range(len(it_lst)):
-                filename = f"{uname}/{location}/{sub_city}/{city}/{items[i]}"
-                f = request.files[f'{it_lst[i]}creds']
-                f.save(os.path.join('static/images/validation/{item}', filename))
-            flash(f"succefully submitted", category="success")                
-        except:
-            flash("Data not succesfully submitted", category="error")
+                filename = f"{uname}_{location}_{sub_city}_{city}_{items[i]}.jpg"
+                basedir = os.path.abspath(os.path.dirname(__file__))
+                f = request.files[f'{it_lst[i]}cred']
+                f.save(os.path.join(basedir, f'static/images/verification/{item}', filename))
+            for i in it_lst:
+                engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully registered a {item}"], "$position": 0 } } } })
+            flash(f"Please check your {item} list", category="success")
+        except ValueError as e:
+            print(e)
+            flash(str(e), category='error')
         return redirect(request.url)
     if item == 'equipment':
         items = ('Equipment', equipments)
@@ -209,8 +230,8 @@ def access_api(end_point):
             rev = request.form.get('rev-input')
             rat = request.form.get('rate')
             data = json.dumps({'uname': user, 'supp': supp, 'rev': rev, 'rating': rat})
-            print(data)
             res = requests.post(url + 'reviews/add_review', json=data, headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
+            engine.update({'coll': 'User', 'row': {'username': user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully submitted a review"], "$position": 0 } } } })
         if end_point == 'loc':
             detail = request.args.get('loc').split(':')
             change = request.form.get('data')
@@ -220,17 +241,16 @@ def access_api(end_point):
                 change = change[:-2].split(', ')
                 data = json.dumps({'uname': user, 'detail': detail[0], 'change': change})
                 res = json.loads(requests.delete(url + f'item/{item}', json=data).json())
-                #print(res)
-                return "Done"
+                engine.update({'coll': 'User', 'row': {'username': user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully removed an {item}"], "$position": 0 } } } })
+                return redirect(request.url)
             ep = ep.split('_')[1]
             if 'Price' in ep:
                 change += request.form.get('input')
             data = {'uname': user, 'detail': detail[0], 'change': change}
-            print(data, ep, item)
             res = requests.post(url + f'change/{ep}/{item}', data=data)
             res = json.loads(res.json())
-        #print(res)
-        return "<h1>Done</h1>"
+            engine.update({'coll': 'User', 'row': {'username': user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the {ep} of a {item}"], "$position": 0 } } } })
+            return redirect(request.url)
     if end_point == "loc":
         req = request.args.get('loc').split(':')
         if 'eq' in req:
@@ -239,13 +259,12 @@ def access_api(end_point):
         else:
             res = requests.get(url + "item/material",
                     params={'user': user, 'locations': req[2]}).json()
-        print(res)
         if 'review' in req:
-            return render_template('review.html', items=json.loads(res), data=(user, req[2]))
+            return render_template('review_or_remove.html', items=json.loads(res), data=(user, req[2]))
         if 'Change' in req[1]:
             return render_template('update_or_review.html', cities=cities, items=json.loads(res), data=(user, req[2]))
         if 'remove' in req[1]:
-            return render_template('review.html', items=json.loads(res), data=(user, req[2]))
+            return render_template('review_or_remove.html', items=json.loads(res), data=(user, req[2]))
     
     if end_point == 'review':
         res = requests.get(url + f'history/{user}')
@@ -258,13 +277,24 @@ def access_api(end_point):
         history = json.loads(res.json())
         return render_template('upload_review.html', history=history)
 
-
-        
-        return "<h1>done</h1>"
     
 
-@views.route('/view/<string:item>')
+@views.route('/view/<string:item>', methods=["POST", "GET"])
 def view(item):
+    if request.method == "POST":
+        if item == 'bookings':
+            input = request.form.get('input').split(':')
+            coll = 'EquipmentSuppliers' if input[2] == 'equipment' else 'MaterialSuppliers'
+            loc = input[0].split('/')
+            place, sub_city, city = loc[0], loc[1], loc[2]
+            print(input)
+            if input[2] == 'equipment':
+                engine.update({'coll': coll,'row': {'username': input[1]}, 'update1':{"$set": {"locations.$[l].items.$[i].available": True}}, 'array_filters': [{'l.name': loc[0], 'l.sub_city': loc[1], 'l.city': loc[2]}, {'i.name': input[3]}]})
+            engine.update({'coll': 'User', 'row': {"username": current_user.username}, 'update1': {"$pull":  {f"{input[2]}_bookings": {"location": input[0], "name": input[3] } } } })
+            engine.update({'coll': coll, 'row': {"username": input[1]}, 'update1': {"$pull":  {f"booked_{input[2]}s": {"location": input[0], "name": input[3] } } } })
+            engine.update({'coll': 'User', 'row': {'username': current_user.username}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully removed a {input[2]} booking"], "$position": 0 } } } })
+            engine.update({'coll': 'User', 'row': {'username': input[1]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"A {input[2]} booking from {current_user.username} has been removed"], "$position": 0 } } } })
+        return redirect(request.url)
     find = {'username': current_user.username}
     if item == 'bookings':
         bookings = engine.find({'coll': 'User', 'find': find, 'fields': {'equipment_bookings': 1, 'material_bookings': 1, '_id': 0} })[0]
@@ -274,11 +304,13 @@ def view(item):
         print(data)
     elif item == 'equipments' or item == 'materials':
         coll = 'EquipmentSuppliers' if item[0] == 'e' else 'MaterialSuppliers'
-        data = engine.find({'coll': coll, 'find': find, 'fields': {'locations': 1, '_id': 0} })[0]['locations']
-        for loc in data:
-            loc['name'] += '/' + loc['sub_city'] + '/' + loc['city']
-            loc.pop('city', None)
-            loc.pop('sub_city', None)
+        data = engine.find({'coll': coll, 'find': find, 'fields': {'locations': 1, '_id': 0} })
+        if data:
+            data = data[0]['locations']
+            for loc in data:
+                loc['name'] += '/' + loc['sub_city'] + '/' + loc['city']
+                loc.pop('city', None)
+                loc.pop('sub_city', None)
         print(data)        
 
     elif item == "history":
@@ -292,7 +324,27 @@ def view(item):
 
 
 
-@views.route('/check')
-def check():
-    return render_template("check.html")
+def restrict_ips(func):
+    def wrapper(*args, **kwargs):
+        if '192' in request.remote_addr[:3]:
+            abort(403)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+
+@views.route('/validate/<string:option>', methods=["POST", "GET"])
+@restrict_ips
+def check(option):
+    if request.method == "POST":
+        val = request.form.get('input')
+        try:
+            raise(ValidationError)
+            flash(f"{option} successfuly done", category='success')
+        except Exception:
+            flash("operation did not succesfuly completed!", category="danger")
+        return redirect(request.url)
+    coll = 'ValItem' if option == 'item' else 'ValSupp'
+    validate = engine.find({'coll': coll, 'find': {}, 'fields': {}})
+    return render_template("validate.html", validate=validate)
 

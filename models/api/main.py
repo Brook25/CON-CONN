@@ -130,14 +130,20 @@ class Reviews(Resource):
             rev = {"username": current_user, "review": req.get("rev")}
             rat = int(req.get('rating'))
             coll = 'EquipmentSuppliers' if supp[-1][0] == 'e' else 'MaterialSuppliers'
-            if rat:
-                rating = engine.find({'coll': coll, 'agg': [{'$match': {'username': supp_name }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.rating': 1, '_id': 0}} ] })[0]['locations']['items']['rating']
-            rating[0] = round(rating[0], 2)
-            new_rat = [(rating[0] + rat) / rating[1] + 1, rating[1] + 1]
-            engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[l].items.$[i].reviews": rev}, "$set": {"locations.$[l].items.$[i].rating": new_rat}}, 'array_filters': [{"l.name": loc[0], "l.city": loc[2], "l.sub_city": loc[1]}, {"i.name": name}] })
-            engine.update({'coll': 'User', 'row': {'username': current_user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": f"You have successfully added a review" } } })
-            print("done")
-            return None, 200
+            rev_rat = engine.find({'coll': coll, 'agg': [{'$match': {'username': supp_name }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.rating': 1, 'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items'] ['rating']
+            reviews = rev_rat['reviews']
+            rating = rev_rat['rating']
+            for rev in reviews:
+                if rev['name'] == current_user:
+                    exists =  True
+                    break
+            if not exists:
+                rating[0] = round(rating[0], 2)
+                new_rat = [(rating[0] + rat) / (rating[1] + 1), rating[1] + 1]
+                engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[l].items.$[i].reviews": rev}, "$set": {"locations.$[l].items.$[i].rating": new_rat}}, 'array_filters': [{"l.name": loc[0], "l.city": loc[2], "l.sub_city": loc[1]}, {"i.name": name}] })
+                engine.update({'coll': 'User', 'row': {'username': current_user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": f"You have successfully added a review" } } })
+                return 'ok', 200
+            return 'Not Done', 200
 
         
         
@@ -186,7 +192,6 @@ class Change(Resource):
         change = request.form.get('change').split(':')
         new_loc = change[1].split('/')
         coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
-        print(change, new_loc, loc)
         if option == "Price":
             engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": {"locations.$[l].items.$[i].price": int(change[1])}}, "array_filters": [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}, {"i.name": change[0]}] })
         
@@ -217,8 +222,6 @@ class Change(Resource):
             
             engine.update({'coll': coll, 'row': {"username": uname},
             'update1': {"$pull": {"locations.$[l].items": {"name": change[0]}}}, 'array_filters': [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}] })
-            return json.dumps({"res": "ok"})
-
 
         else:
             change.pop()
@@ -232,7 +235,7 @@ class Change(Resource):
             
 
          
-            return json.dumps({'res': 'ok'})
+        return json.dumps({'res': 'ok'})
 
 
 

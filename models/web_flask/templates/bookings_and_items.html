@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
 
 <style>
 
@@ -24,7 +26,53 @@
   margin: auto;
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  border-radius: 10px;
+  width: 30%;
+  height: 70px;
+}
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  display: block;
+  float: right;
+  top: 5px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
 }
 
 
@@ -74,11 +122,92 @@
   /*background-color: rgba(41, 103, 182, 0.89);*/
   color: #ff0000;
 }
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+.empty {
+  position: absolute;
+  top: 20%;
+  left: 36%;
+}
 
 
+#sad {
+  position: absolute;
+  color: crimson;
+  top: 200px;
+  left: 45%;
+  font-size: 40px;
+}
+
+#title {
+  position: absolute;
+  top: 12%;
+  left: 45%;
+}
+
+#accept {
+  position: absolute;
+  top: 22%;
+  left: 40%;
+  width: 80px;
+  cursor: pointer;
+  color: white;
+  height: 25px;
+  border-radius: 5px;
+  background-color: blue;
+}
+
+#decline {
+  position: absolute;
+  top: 22%;
+  left: 55%;
+  width: 80px;
+  color: white;
+  cursor: pointer;
+  height: 25px;
+  text-align: center;
+  border-radius: 5px;
+  background-color: red;
+}
+
+.close {
+  position: relative;
+  bottom: 15px;
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
 </style>
 	</head>
 	<body>
+		 <nav class="nav1">
+                  <ul class="nav_links">
+			  <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+		{% if data %} 
 		<div align="center">
 			<div class="close-btn">&times;</div>
 			    <div>
@@ -89,7 +218,7 @@
 				</h4>
 			      </div>
 			      <div>
-				 <table class="content-table" id="table">
+				<table class="content-table" id="table">
 				<thead>
 				<tr>
 				<th>Location </th>
@@ -129,7 +258,7 @@
                                 <td>{{val.years_used}}</td>
                                 {% endif %}
 				<td>{{val.available}}</td>
-				<td>{{val.rating}}</td>
+				<td>{{val.rating[0]}}</td>
 				{% endfor %}
 				</tr>
 				{% endfor %}
@@ -148,36 +277,47 @@
 				</tbody>
 				{% endif %}
 			</table>
+                	{% else %}
+                	<div class="empty"><h4>Sorry, Nothing to show for now. Come back later</h4></div>
+                	<div><i id="sad" class="fas fa-sad-cry"></i></div>
+                	{% endif %}
 
 		</div>
 			      </div>
 			    </div>
 		</div>
-	<!--{% if 'equipments' in request.path %}
+
 	<div class="modal" id="modal">
-        	<div class="modal-content">
-        	<div id="review-title">
-        	<span><h2 align="center">Reviews</h2></span>
-		</div>
-        	<div id="reviews" class="reviews">
-        	</div>
-        	</div>
+                <div class="modal-content">
+                <span id="close" class="close">&times;</span>
+                <span id="title"><h3 align="center">Remove Booking?</h3></span>
+                <div id="reviews" class="reviews">
+		<form method="POST">
+		<input name="input" class="input" id="input"/>
+		<button id="accept" type="submit" class="btn btn-primary" align="center">Yes</button>
+		<span id="decline" type="submit" class="btn btn-primary" align="center">No</span>
+                </div>
+                </div>
         </div>
-	{% else %}
-	<form method="POST">
-	<div>
-	<div>
-	<input name="data" id="input"/>
-	</div>
-	<div>
-	<button>Submit</button>
-	</div>
-	</div>
-	</form>
-	{% endif %}-->
-
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-
+	{% if 'bookings' in request.path %}
+	<script>
+	let modal = document.getElementById('modal');
+	let rows = document.getElementById('table');
+	let input = document.getElementById('input');
+	for (let row of table.rows) {
+	  row.onclick = function() {
+	    let val = this.cells[0].innerHTML + ':' + this.cells[1].innerHTML + ':'+ this.cells[2].innerHTML + ':' + this.cells[3].innerHTML;
+	    input.value = val;
+	    modal.style.display = "block";
+	  }
+	}
+	
+	let close = document.getElementById('close');
+	close.onclick = function() {
+	  modal.style.display = 'none';
+	}
+	</script>
+	{% endif %}	
 	</body>
 </html>

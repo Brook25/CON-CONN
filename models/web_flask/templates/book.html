@@ -77,6 +77,21 @@ position: relative;
 top: 100px;
 }
 
+.message {
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  background-color: #99FF66;
+  font-size: 20px;
+  text-align: center;
+}
+
+.message span {
+  position: relative;
+  right: 5px;
+ float: right;
+}
 
 </style>
 
@@ -86,6 +101,14 @@ top: 100px;
 
 
 <body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="message">{{message}}<span>&times;</span> </div>
+{% endfor %}
+{% endif %}
+{% endwith %}
 <nav class="nav1">
                   <ul class="nav_links">
                           <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
