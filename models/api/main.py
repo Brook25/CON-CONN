@@ -130,11 +130,12 @@ class Reviews(Resource):
             rev = {"username": current_user, "review": req.get("rev")}
             rat = int(req.get('rating'))
             coll = 'EquipmentSuppliers' if supp[-1][0] == 'e' else 'MaterialSuppliers'
-            rev_rat = engine.find({'coll': coll, 'agg': [{'$match': {'username': supp_name }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.rating': 1, 'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items'] ['rating']
+            rev_rat = engine.find({'coll': coll, 'agg': [{'$match': {'username': supp_name }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.rating': 1, 'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items']
             reviews = rev_rat['reviews']
             rating = rev_rat['rating']
+            exists = False
             for rev in reviews:
-                if rev['name'] == current_user:
+                if rev['username'] == current_user:
                     exists =  True
                     break
             if not exists:
@@ -193,6 +194,7 @@ class Change(Resource):
         new_loc = change[1].split('/')
         coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
         if option == "Price":
+            print('hello', loc, request.form)
             engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": {"locations.$[l].items.$[i].price": int(change[1])}}, "array_filters": [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}, {"i.name": change[0]}] })
         
         elif option == "location":
@@ -229,6 +231,7 @@ class Change(Resource):
             av = dict([[item['name'].lower(), not(item['available'])] for item in query])
             update1 = {f"locations.$[l].items.$[{k}].available":  av[k] for k in sorted(av.keys())}
             array_filters = [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}]+ [{f"{k}.name": k[0].upper() + k[1:]} for k in sorted(av.keys())]
+            print(coll, query, update1, array_filters)
             dct = {'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters}
             print(dct)
             engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters})

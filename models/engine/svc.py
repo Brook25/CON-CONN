@@ -146,28 +146,24 @@ class DBEngine:
 
 
     def feed_history(self, username):
-        eq_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$equipment_bookings"}, {"$match": {"equipment_bookings.return_date": {"$lt": datetime.utcnow()} } }, {"$project": {"equipment_bookings": 1, "_id": 0} }] })
-        
+        eq_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$equipment_bookings"}, {"$match": {"equipment_bookings.return_date": {"$gt": datetime.utcnow()} } }, {"$project": {"equipment_bookings": 1, "_id": 0} }] })
         eq_lst = []
         for dct in eq_history:
             if {'username': dct['equipment_bookings']['username'], 'location': dct['equipment_bookings']['location']} not in eq_lst:
                 eq_lst += [{'username': dct['equipment_bookings']['username'], 'location': dct['equipment_bookings']['location']}]
-        print(eq_lst)
         for item in eq_lst:
             item['name'] = []
-            print(item)
             for eq in eq_history:
                 if item['username'] == eq['equipment_bookings']['username'] and item['location'] == eq['equipment_bookings']['location']:
                     item['name'] += [eq['equipment_bookings']['name']]
         for eq in eq_lst:
             loc = eq['location'].split('/')
-            print(eq, loc)
             self.update({'coll': 'EquipmentSuppliers','row': {'username': eq['username']}, 'update1':{"$set": {"locations.$[l].items.$[i].available": True}}, 'array_filters': [{'l.name': loc[0], 'l.sub_city': loc[1], 'l.city': loc[2]}, {'i.name': {'$in': eq['name']}}]})
+        mt_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$material_bookings"}, {"$match": {"material_bookings.return_date": {"$gt": datetime.utcnow()} } }, {"$project": {"material_bookings": 1, "_id": 0} }] })
+        self.update({'coll': 'User', 'row': {"username": username}, 'update1': {"$pull":  {"equipment_bookings": {"return_date": {"$gt": datetime.utcnow()} }, "material_bookings": {"return_date": {"$gt": datetime.utcnow()} } } } })
+        self.update({'coll': 'EquipmentSuppliers', 'row': {"username": username}, 'update1': {"$pull": {"booked_equipments": {"return_date": {"$gt": datetime.utcnow() } } } } })
+        self.update({'coll': 'MaterialSuppliers', 'row': {"username": username}, 'update1': {"$pull": {"booked_materials": {"return_date": {"$gt": datetime.utcnow() } } } } })
         print(eq_history)
-        mt_history = self.find({'coll': 'User', 'agg': [{"$match": {"username": username}}, {"$unwind": "$material_bookings"}, {"$match": {"material_bookings.return_date": {"$lt": datetime.utcnow()} } }, {"$project": {"material_bookings": 1, "_id": 0} }] })
-        self.update({'coll': 'User', 'row': {"username": username}, 'update1': {"$pull":  {"equipment_bookings": {"return_date": {"$lt": datetime.utcnow()} }, "material_bookings": {"return_date": {"$lt": datetime.utcnow()} } } } })
-        self.update({'coll': 'EquipmentSuppliers', 'row': {"username": username}, 'update1': {"$pull": {"booked_equipments": {"return_date": {"$lt": datetime.utcnow() } } } } })
-        self.update({'coll': 'MaterialSuppliers', 'row': {"username": username}, 'update1': {"$pull": {"booked_materials": {"return_date": {"$lt": datetime.utcnow() } } } } })
         history = list(map(lambda x: x['equipment_bookings'], eq_history)) + list(map(lambda x: x['material_bookings'], mt_history))
         history = sorted(history, key=lambda x: x['date'])
         self.update({'coll': 'User', 'row': {'username': username},

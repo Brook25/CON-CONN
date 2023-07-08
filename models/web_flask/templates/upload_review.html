@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />-->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
 
 	 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
@@ -238,6 +239,31 @@ input {
   font-size: 40px;
 }
 
+button {
+  position: relative;
+  left: 550px;
+  height: 20px;
+  cursor: pointer;
+  background-color: steelblue;
+  color: white;
+  border-radius: 3px;
+}
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus,
+.modal-option:hover{
+  color: red;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
 </style>
 	</head>
 	<body>
@@ -294,6 +320,7 @@ input {
 		</div>
 	<div class="modal" id="modal">
         	<div class="modal-content">
+        	<span class="close" id="close">&times;</span>
 			{%if 'review' in request.path %}
 			<div>
 			<span><h2 align="center"><i>Input Review and Rating</i></h2></span>
@@ -320,7 +347,7 @@ input {
 	</fieldset>
         </div>
 	<div>
-	<input class="supp-input" type="text" id="supp" name="supp" value=""/>
+	<input class="supp-input" type="hidden" id="supp" name="supp" value=""/>
 	</div>
 	</div>
 			<button type="submit" class="btn btn-primary">Submit</button>
@@ -360,6 +387,16 @@ input {
    $(this).addClass('selected').siblings().removeClass('selected');
         console.log('selected');
 });
+	let span = document.getElementById("close");
+	span.onclick = function() {
+                modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+                  modal.style.display = "none";
+          }
+        }
         	</script>
 
 	</body>

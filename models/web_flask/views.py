@@ -42,7 +42,7 @@ def query(item):
 
             print(book, details, bookings, loc, item)
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$set": { "locations.$[ln].items.$[it].available": False } }, "array_filters": [ {"ln.name": loc['name'], "ln.city": loc['city'], "ln.sub_city": loc['sub_city'] }, {"it.name": details[1]} ] })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"One of your {item}s have been booked"], "$position": 0 } } } })
+            engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"One of your {item}s have been booked"], "$position": 0 } } } })
             
             days = 1 if item == 'material' else int(request.args.get('days'))
             booking = {"username": details[0], "location": ('/').join(loc.values()), 'item': item , "name": details[1], 'date': datetime.utcnow()}
@@ -53,7 +53,7 @@ def query(item):
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {"$push":  {f"{item}_bookings": booking } } } )
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$push":  {f"booked_{item}s": booked } } })
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"You have successfully booked a {item}"], "$position": 0 } } } })
-        flash(f"Equipment succesfully booked", "success")
+        flash(f"Please feel free to add other bookings", "success")
         return redirect(url_for('views.book', item=item))
         #return redirect(url_for("views.welcome"))
     print(query)
@@ -120,20 +120,27 @@ def book(item):
     materials = ["Sand", "Steel", "Aggregate", "Cement"]
 
     if request.method == "POST":
-        if item == 'equipment':
-            coll = 'EquipmentSuppliers'
-            selector = "machine"
-        else:
-            coll = 'MaterialSuppliers'
-            selector = "name"
-        city = request.form.get('city')
-        sub_city = request.form.get('sub-city').split('/')[1]
-        location = request.form.get('location')
-        equipments = request.form.get('equipment').split(', ')
-        query1 = engine.find({'coll': coll, 'agg': [ {"$match": {"username": {"$not": {"$eq": uname}}}}, {"$unwind": "$locations"}, {"$unwind": "$locations.items"}, {"$match": {"locations.name": location, "locations.city": city, "locations.sub_city": sub_city, f"locations.items.{selector}": { "$in": equipments }, "locations.items.available": True } }, {"$project": {"_id": 0, "username": 1, "locations.items": 1, "contact_info": 1} }] })
-        print(city, sub_city, location, equipments)
-        loc = f"{location}/{sub_city}/{city}"
-        return redirect(url_for('views.query', item=item, query1=json.dumps(query1), loc=loc, days=request.form.get('days')))
+        try:
+            if item == 'equipment':
+                coll = 'EquipmentSuppliers'
+                selector = "machine"
+            else:
+                coll = 'MaterialSuppliers'
+                selector = "name"
+            city = request.form.get('city')
+            sub_city = request.form.get('sub-city')
+            location = request.form.get('location')
+            eqs = request.form.get('equipment')
+            if not (city and sub_city and location and eqs and request.form.get('days')):
+                raise ValueError("fields not properly filled.")
+            sub_city, eqs = sub_city.split('/')[1], eqs.split(', ')
+            query1 = engine.find({'coll': coll, 'agg': [ {"$match": {"username": {"$not": {"$eq": uname}}}}, {"$unwind": "$locations"}, {"$unwind": "$locations.items"}, {"$match": {"locations.name": location, "locations.city": city, "locations.sub_city": sub_city, f"locations.items.{selector}": { "$in": eqs }, "locations.items.available": True } }, {"$project": {"_id": 0, "username": 1, "locations.items": 1, "contact_info": 1} }] })
+            query1 = sorted(sorted(query1, key=lambda x: x['locations']['items'].get('name')), key=lambda x: x.get('username'))
+            loc = f"{location}/{sub_city}/{city}"
+            return redirect(url_for('views.query', item=item, query1=json.dumps(query1), loc=loc, days=request.form.get('days')))
+        except Exception as e:
+            flash(str(e), category='error')
+    print(equipments)
     if item == 'equipment':
         items = ('Equipment(s)', equipments)
     else:
@@ -259,16 +266,17 @@ def access_api(end_point):
         else:
             res = requests.get(url + "item/material",
                     params={'user': user, 'locations': req[2]}).json()
+            res = sorted(sorted(json.loads(res), key=lambda x: x.get('name')), key=lambda x: x.get('username'))
         if 'review' in req:
-            return render_template('review_or_remove.html', items=json.loads(res), data=(user, req[2]))
+            return render_template('review_or_remove.html', items=res, data=(user, req[2]))
         if 'Change' in req[1]:
-            return render_template('update_or_review.html', cities=cities, items=json.loads(res), data=(user, req[2]))
+            return render_template('update_or_review.html', cities=cities, items=res, data=(user, req[2]))
         if 'remove' in req[1]:
-            return render_template('review_or_remove.html', items=json.loads(res), data=(user, req[2]))
+            return render_template('review_or_remove.html', items=res, data=(user, req[2]))
     
     if end_point == 'review':
         res = requests.get(url + f'history/{user}')
-        history = json.loads(res.json())
+        history = sorted(sorted(json.loads(res.json()), key=lambda x: x.get('name')), key=lambda x: x.get('username'))
         return render_template('upload_review.html', history=history)
 
     if end_point == 'complaints':
@@ -300,8 +308,7 @@ def view(item):
         bookings = engine.find({'coll': 'User', 'find': find, 'fields': {'equipment_bookings': 1, 'material_bookings': 1, '_id': 0} })[0]
         bookings['material_bookings'].extend(bookings['equipment_bookings'])
         bookings = bookings['material_bookings']
-        data=bookings
-        print(data)
+        data = bookings
     elif item == 'equipments' or item == 'materials':
         coll = 'EquipmentSuppliers' if item[0] == 'e' else 'MaterialSuppliers'
         data = engine.find({'coll': coll, 'find': find, 'fields': {'locations': 1, '_id': 0} })
@@ -311,15 +318,24 @@ def view(item):
                 loc['name'] += '/' + loc['sub_city'] + '/' + loc['city']
                 loc.pop('city', None)
                 loc.pop('sub_city', None)
-        print(data)        
-
     elif item == "history":
         data = engine.find({'coll': 'User', 'find': find, 'fields': {'history': 1, '_id': 0} })[0]['history']
-        print(data)
     elif item == "booked":
-        pass
-        #TODO: optional
-    #return "Done"
+        booked_eq = engine.find({'coll': 'EquipmentSuppliers', 'find': {'username': current_user.username}, 'fields': {'booked_equipments': 1, '_id': 0} }) 
+        if booked_eq:
+            booked_eq = booked_eq[0]['booked_equipments']
+        booked_eq = sorted(sorted(booked_eq, key=lambda x: x.get('name')), key=lambda x: x.get('usrename'))
+        booked_mt = engine.find({'coll': 'MaterialSuppliers', 'find': {'username': current_user.username}, 'fields': {'booked_materials': 1, '_id': 0} })
+        if booked_mt:
+            booked_mt = booked_mt[0]['booked_materials']
+        booked_mt = sorted(sorted(booked_mt, key=lambda x: x.get('name')), key=lambda x: x.get('usrename'))
+        return render_template('booked.html', data=(booked_eq, booked_mt))
+    if item == 'equipments' or item == 'materials':
+        data.sort()
+        for loc in data:
+            loc['items'] = sorted(loc['items'], key=lambda x: x.get('name'))
+    else:
+        data = sorted(sorted(data, key=lambda x: x.get('name')), key=lambda x: x.get('date'), reverse=True)
     return render_template('bookings_and_items.html', data=data)
 
 

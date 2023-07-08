@@ -77,22 +77,26 @@ position: relative;
 top: 100px;
 }
 
+
 .message {
-  width: 100%;
-  height: 30px;
+  position: absolute;
+  display: block;
+  left: 30%;
+  width: 30%;
+  height: 80px;
   padding: 0;
   margin: 0;
   background-color: #99FF66;
-  font-size: 20px;
+  font-size: 15px;
   text-align: center;
 }
 
 .message span {
   position: relative;
   right: 5px;
- float: right;
+  float: right;
+  cursor: pointer;
 }
-
 </style>
 
 
@@ -101,11 +105,19 @@ top: 100px;
 
 
 <body>
-
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 {% for category, message in messages %}
-<div class="message">{{message}}<span>&times;</span> </div>
+{% if category == 'error' %}
+<div class="message" id="message" style="background-color: #FFCCCB;">{{request.path.split('/')[-1]}} query not successfully completed<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+<div>Please fill the fields properly, and resubmit the form</div>
+</div>
+{% else %}
+<div class="message" id="message" style="background-color: #adff29;">{{request.path.split('/')[-1]}} successfully booked<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+</div>
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endwith %}
@@ -282,6 +294,12 @@ top: 100px;
 
 
             });
+
+	 function CloseMessage() {
+          let message_box = document.getElementById('message');
+          message_box.style.display = 'none';
+        }
+
         </script>
 
 </body>

@@ -61,8 +61,8 @@ body {
   color: black;
   font-size: 17px;
   padding: 7px 13px;
+  text-align: center;
   text-decoration: none;
-  border-radius: 8px;
   /*text-transform: uppercase;*/
 }
 
@@ -81,7 +81,7 @@ display: none;
   position: absolute;
   top: 0;
   bottom: 0;
-  height: 100%;
+  height: 101%;
   left: 0;
   background: #fff;
   text-decoration: none;
@@ -162,6 +162,7 @@ text-align: center;
 
 .nav-item{
 position: relative;
+text-align: center;
 top: 12px;
 margin-left: 15px;
 }
@@ -258,6 +259,7 @@ h1{
   width: 24px;
   height: 24px;
   text-align: center;
+  vertical-align: middle;
   font-size: 12px;
   border-radius: 50%;
 }
@@ -375,16 +377,39 @@ color: red;
 }
 
 
+.logout {
+  position: relative;
+  top: 30px;
+}
+
+#user1 {
+  position: relative;
+  top: 12px;
+  margin-left: 15px;
+  line-height: 20px;
+  width: 30px;
+  height: 20px;
+  padding: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: center;
+  font-size: 15px;
+  background-color: #FF5733;
+  border-radius: 50%;
+}
+
+
+
 </style>
 
 </head>
 <body>
 	 <nav class="nav1">
                   <ul class="nav_links">
-			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Home</span><i class="fas fa-home"></i></a></li>
-			  <li class="nav_items"><a href="#" class="nav_x"><span class="nav-item">Alert</span><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+			  <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-home"></i></a></li>
+			  <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
 			</li>
-			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span class="nav-item">Log out</span><i class="fas fa-sign-out-alt"></i></a></li>
+			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
                   </ul>
 	 </nav><br /><br />
 
@@ -499,9 +524,9 @@ color: red;
                             <span class="nav-item">History</span></a>
                     </li>
                     <li>
-                            <a href="#" class="side-content">
-                            <i class="fas fa-star"></i>
-                            <span class="nav-item">Reviews</span></a>
+                            <a href="{{url_for('views.view', item='booked')}}" class="side-content">
+                            <i class="fas fa-book"></i>
+                            <span class="nav-item">Booked</span></a>
                     </li>
 
                         <li>
@@ -510,6 +535,11 @@ color: red;
                             <span class="nav-item">Help</span></a>
                     </li>
 
+		<li class="logout"> 
+		<a href={{url_for('auth.logout')}} class="side-content">
+		<i class="fas fa-sign-out-alt"></i>
+		<span class="nav-item">Log out</span></a>
+		</li>
                   </ul>
 
         </nav>

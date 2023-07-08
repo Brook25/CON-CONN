@@ -238,6 +238,7 @@ text-align: center;
 				{%if 'equipments' in request.path or 'materials'  in request.path %}
 				<th>Available </th>
 				<th>Rating </th>
+				<th>Price </th>
 				{% else %}
 				<th>Date Booked</th>
 				<th>Date Returned</th>
@@ -259,6 +260,7 @@ text-align: center;
                                 {% endif %}
 				<td>{{val.available}}</td>
 				<td>{{val.rating[0]}}</td>
+				<td>{{val.price}}</td>
 				{% endfor %}
 				</tr>
 				{% endfor %}
