@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />-->
+	<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />-->
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+
+<style>
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.table-modal {
+  position: relative;
+  top: 40px;
+
+}
+
+.nav-item{
+position: relative;
+text-align: center;
+top: 12px;
+margin-left: 15px;
+}
+
+
+
+ /* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 30%;
+  height: 70px;
+}
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  display: block;
+  float: right;
+  top: 5px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+
+.content-table {
+	border-collapse: collapse;
+	margin: 25px 0;
+	font-size: 0.9em;
+	min-width: 400px;
+	border-radius: 5px 5px 0 0;
+	overflow: hidden;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: left;
+}
+
+.content-table th,
+.content-table td {
+  padding: 12px 15px;
+}
+
+
+.content-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.content-table tbody tr:nth-of-type(even) {
+	background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+	border-bottom: 2px solid #009879;
+}
+
+
+.content-table tbody tr:hover {
+  background-color: #ffff99;
+}
+
+
+.content-table .selected {
+  /*background-color: rgba(41, 103, 182, 0.89);*/
+  color: #ff0000;
+}
+
+
+.fas{
+position: relative;
+width: 70px;
+height: 40px;
+color: teal;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+.empty {
+  position: relative;
+  top: 100px;
+  left: 36%;
+}
+
+
+#sad {
+  position: relative;
+  color: crimson;
+  top: 90px;
+  left: 45%;
+  font-size: 40px;
+}
+
+#title {
+  position: absolute;
+  top: 12%;
+  left: 45%;
+}
+
+#accept {
+  position: absolute;
+  top: 22%;
+  left: 40%;
+  width: 80px;
+  cursor: pointer;
+  color: white;
+  height: 25px;
+  border-radius: 5px;
+  background-color: blue;
+}
+
+#decline {
+  position: absolute;
+  top: 22%;
+  left: 55%;
+  width: 80px;
+  color: white;
+  cursor: pointer;
+  height: 25px;
+  text-align: center;
+  border-radius: 5px;
+  background-color: red;
+}
+
+.close {
+  position: relative;
+  bottom: 15px;
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+
+.Note {
+  position: relative;
+  top: 50px;
+  left: 150px;
+  color: blue;
+  font-size: 17px;
+}
+
+</style>
+	</head>
+	<body>
+		 <nav class="nav1">
+                  <ul class="nav_links">
+			  <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+<div class="Note">
+	{% if 'bookings' in request.path %}
+       <div><b><i>&#x2022; If you change your mind about an equipment or material you have booked and want to unbook it. Feel free to remove the booking, and possibly contact the supplier</div><br />
+		       <div>&#x2022; You can click on the row corresponding to the spcific material or equipment and choose the option to cancel your booking</div></b></i>
+	{% else %}
+	<div><b><i>&#x2022; This is a list of your {{request.path.split('/')[-1]}}</div><br />
+	<div>&#x2022; The list is oredered based on the name of locations and name of equipments or materials</div></b></i>
+	{% endif %}
+</div>
+		{% if data %} 
+		<div class="table-modal" align="center">
+			<div class="close-btn">&times;</div>
+			    <div>
+			      <div>
+			      <div>
+			        <h4>
+				{% if 'history' not in request.path %}
+				A list of your {{request.path.split('/')[-1]}}
+				{% else %}
+				This is a history of your bookings and activities
+				{% endif %}
+				</h4>
+			      </div>
+			      <div>
+				<table class="content-table" id="table">
+				<thead>
+				<tr>
+				<th>Location </th>
+				{%if 'bookings' in request.path or 'history'  in request.path %}
+                                <th>Supplier </th>
+                                {% endif %}
+				{%if 'equipments' in request.path %}
+				<th>Machine </th>
+				{% endif %}
+				 {%if 'bookings' in request.path or 'history' in request.path %}
+                                <th>Type</th>
+				{% endif %}
+				<th>Name </th>
+				{%if 'equipments' in request.path %}
+				<th>Years used </th>
+				{% endif %}
+				{%if 'equipments' in request.path or 'materials'  in request.path %}
+				<th>Available </th>
+				<th>Rating </th>
+				<th>Price </th>
+				{% else %}
+				<th>Date Booked</th>
+				<th>Date Returned</th>
+				{% endif %}
+				</tr>
+				</thead>
+				{%if 'equipments' in request.path or 'materials'  in request.path %}
+				<tbody>
+				{% for item in data %}
+				{% for val in item['items']%}
+				<tr>
+				<td>{{ item.name }}</td>
+				{%if 'equipments' in request.path %}
+				<td>{{val.machine}}</td>
+				{% endif %}
+				<td>{{val.name}}</td>
+				{%if 'equipments' in request.path %}
+                                <td>{{val.years_used}}</td>
+                                {% endif %}
+				<td>{{val.available}}</td>
+				<td>{{val.rating[0]}}</td>
+				<td>{{val.price}}</td>
+				{% endfor %}
+				</tr>
+				{% endfor %}
+				{% else %}
+				<tbody>
+				{% for item in data %}
+				</tr>
+				<td>{{ item.location }}</td>
+				<td>{{item.username}}</td>
+				<td>{{item.item}}</td>
+				<td>{{item.name}}</td>
+				<td>{{item.date}}</td>
+				<td>{{item.return_date}}</td>
+				{% endfor %}
+				</tr>
+				</tbody>
+				{% endif %}
+			</table>
+                	{% else %}
+                	<div class="empty"><h4>Sorry, Nothing to show for now. Come back later</h4></div>
+                	<div><i id="sad" class="fas fa-sad-cry"></i></div>
+                	{% endif %}
+
+		</div>
+			      </div>
+			    </div>
+		</div>
+
+	<div class="modal" id="modal">
+                <div class="modal-content">
+                <span id="close" class="close">&times;</span>
+                <span id="title"><h3 align="center">Remove Booking?</h3></span>
+                <div id="reviews" class="reviews">
+		<form method="POST">
+		<input name="input" class="input" id="input"/>
+		<button id="accept" type="submit" class="btn btn-primary" align="center">Yes</button>
+		<span id="decline" type="submit" class="btn btn-primary" align="center">No</span>
+                </div>
+                </div>
+        </div>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+	<script>"https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/js/bootstrap.bundle.min.js"</script>
+        <script>"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"</script>
+        <script>"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	{% if 'bookings' in request.path %}
+	<script>
+	let modal = document.getElementById('modal');
+	let rows = document.getElementById('table');
+	let input = document.getElementById('input');
+	for (let row of table.rows) {
+	  row.onclick = function() {
+	    let val = this.cells[0].innerHTML + ':' + this.cells[1].innerHTML + ':'+ this.cells[2].innerHTML + ':' + this.cells[3].innerHTML;
+	    input.value = val;
+	    modal.style.display = "block";
+	  }
+	}
+	
+	let close = document.getElementById('close');
+	close.onclick = function() {
+	  modal.style.display = 'none';
+	}
+	</script>
+	{% endif %}	
+	</body>
+</html>

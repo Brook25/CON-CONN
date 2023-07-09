@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+
+<style>
+
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  display: block;
+  float: right;
+  top: 5px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+
+
+.content-table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 0.9em;
+  min-width: 400px;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: left;
+}
+
+.content-table th,
+.content-table td {
+  padding: 12px 15px;
+}
+
+
+.content-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.content-table tbody tr:nth-of-type(even) {
+	background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+	border-bottom: 2px solid #009879;
+}
+
+
+.content-table tbody tr:hover {
+  background-color: #ffff99;
+}
+
+
+.content-table .selected {
+  /*background-color: rgba(41, 103, 182, 0.89);*/
+  color: #ff0000;
+}
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 60%;
+}
+
+.empty {
+  position: absolute;
+  top: 20%;
+  left: 36%;
+}
+
+
+#sad {
+  position: absolute;
+  color: crimson;
+  top: 200px;
+  left: 45%;
+  font-size: 40px;
+}
+
+.inner {
+  position: relative;
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  padding: 1px;
+}
+
+.inner:nth-of-type(even) {
+  background-color: #FFFFCC;
+}
+
+
+.inner:nth-of-type(odd) {
+  background-color: #CCFFCC;
+}
+
+.uname {
+  padding: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: green;
+  font-size: 17px;
+  color: white;
+  border-radius: 50%;
+}
+
+.inner {
+  margin-bottom: 10px;
+</style>
+	</head>
+	<body>
+		 <nav class="nav1">
+                  <ul class="nav_links">
+			  <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+
+		<div align="center">
+			     {% if query %}
+			<div class="close-btn">&times;</div>
+			    <div class="modal-dialog">
+			      <div>
+			      <div>
+			        <h4 class="modal-title">
+				Book an Equipment supplier
+				</h4>
+			      </div>
+			      <div class="modal-body">
+				 <table class="content-table" id="table">
+				<thead>
+				<tr>
+				<th>User name </th>
+				<th>Name </th>
+				{% if query[0].locations['items'].get('machine')  %}
+				<th>Machine </th>
+				<th>Years used </th>
+				{% endif %}
+				<th>Rating </th>
+				<th>Contact Info</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for supp in query %}
+				<tr>
+				<td>{{supp.username}}</td>
+				<td>{{supp.locations['items']['name']}}</td>
+				{% if supp.locations['items'].get('machine')  %}
+				<td>{{ supp.locations['items']['machine']}}</td>
+				<td>{{supp.locations['items']['years_used']}}</td>
+				{% endif %}
+				<td>{{supp.locations['items']['rating'][0]}}</td>
+				<td>{{supp.contact_info}}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			<form method="POST">
+			<input type="hidden" id="booksupplier" name="supp" value=""/>
+			<input type="hidden" id="booksupplier" name="supp" value="{{location}}"/>
+			<button type="submit" class="btn btn-primary" align="center">Submit</button>
+			</form>
+		</div>
+		</div>
+		</div>
+		 {% else %}
+                <div class="empty"><h4>Sorry, Nothing to show for now. Come back later</h4></div>
+		<div><i id="sad" class="fas fa-sad-cry"></i></div>
+                {% endif %}
+		</div>
+	<div class="modal" id="modal">
+                <div class="modal-content">
+                <span id="close" class="close">&times;</span>
+                <div id="review-title">
+                <span><h2 align="center">Reviews</h2></span>
+                </div>
+                <div id="reviews" class="reviews">
+                </div>
+                </div>
+        </div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script>"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"</script>
+		<script>
+			 async function get_reviews(url, val) {
+			let req = val.split('-');
+			let loc = JSON.parse('{{ request.args['loc'] | tojson}}');
+  			let review_div = document.getElementById('reviews');
+			const res = await fetch(url, {
+                          method: "POST",
+                          headers: {'Accept': 'application/json',
+                                 'Content-Type': 'application/json'},
+                          body: JSON.stringify({uname: req[0], loc: loc, name: req[1]})
+                          });
+                        let res_json = await res.json();
+                        let rev = JSON.parse(res_json);
+			console.log(rev, rev.length);
+			  if (rev.length === 0) {
+			    if (!(review_div.innerHTML.includes("Sorry")))
+			    review_div.innerHTML += '<div align="center"><h4>' + 'Sorry, Nothing to show here' + '</h4></div>';
+			
+			}
+			else
+			rev.map((elem) => {
+                          html = '<div class="inner">' + '<h4><span class="uname">' + elem["username"][0] + '</span> &nbsp;&nbsp@' + elem['username'] + ' said: ' +  '<i>"' +  elem['review'] + '"</i>' + '</h4>' + '</div>';
+                        review_div.innerHTML += html;
+			});
+			
+                        modal.style.display = "block";
+			 }	 
+
+                let table = document.getElementById('table');
+		let inputElem = document.getElementById("booksupplier");
+                for(let i = 1; i < table.rows.length; i++)
+                  {
+                    table.rows[i].onclick = function()
+                      {
+			let val = this.cells[0].innerHTML + '-' + this.cells[1].innerHTML + ', ';
+			      if (inputElem.value.includes(val)) {
+				inputElem.value = inputElem.value.replace(val, "");
+				console.log(inputElem.value, val);
+			      }
+			      else {
+				inputElem.value += val;
+				        let item;
+                              if ({{ request.path | tojson}}.includes('material'))
+                                item = 'materials';
+                              else
+                                item = 'equipments';
+                              get_reviews(`http://127.0.0.1:5001/reviews/${item}`, val);
+			    }
+
+			/*document.getElementById("booksupplier").value = this.cells[2].innerHTML;*/
+                      };
+                  }
+
+	let modal = document.getElementById("modal");
+	let span = document.getElementById("close");
+	span.onclick = function() {
+                modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+                  modal.style.display = "none";
+          }
+        }
+
+   
+		$("tbody tr").click(function() {
+		  if ($(this).hasClass('selected')) {
+			$(this).removeClass('selected');
+
+		  }
+		  else {
+		    $(this).addClass('selected');
+		  }
+		});
+
+		/*$("tbody tr").click(function() {
+   $(this).addClass('selected').siblings().removeClass('selected');
+        console.log('selected');
+});*/
+        	</script>
+
+	</body>
+</html>
+
+

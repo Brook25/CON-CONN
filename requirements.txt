@@ -1,0 +1,13 @@
+email_validator==2.0.0.post2
+Flask==2.3.2
+Flask_Cors==3.0.8
+Flask_Login==0.6.2
+Flask_RESTful==0.3.10
+Flask_WTF==1.1.1
+mongoengine==0.27.0
+passlib==1.7.4
+pip==22.3.1
+pip==23.1.2
+pymongo==4.3.3
+Requests==2.31.0
+WTForms==3.0.1

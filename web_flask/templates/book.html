@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+
+<style>
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  position: absolute;
+  display: block;
+  right: 10px;
+  float: right;
+  top: 15px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+.container {
+position: relative;
+top: 100px;
+}
+
+
+.message {
+  position: absolute;
+  display: block;
+  left: 30%;
+  width: 30%;
+  height: 80px;
+  padding: 0;
+  margin: 0;
+  background-color: #99FF66;
+  font-size: 15px;
+  text-align: center;
+}
+
+.message span {
+  position: relative;
+  right: 5px;
+  float: right;
+  cursor: pointer;
+}
+
+.Note {
+  position: relative;
+  top: 30px;
+  left: 100px;
+  color: red;
+  font-size: 15px;
+}
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+{% if category == 'error' %}
+<div class="message" id="message" style="background-color: #FFCCCB;">{{request.path.split('/')[-1]}} query not successfully completed<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+<div>Please fill the fields properly, and resubmit the form</div>
+</div>
+{% else %}
+<div class="message" id="message" style="background-color: #adff29;">{{request.path.split('/')[-1]}} successfully booked<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+<nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+<div class="Note">
+	<div><b><i>&#x2022; Please Make sure to fill out the fields properly and choose the right options. If the fields are not filled properly we won't be able to provide you with the information you need.</div><br />
+		<div>&#x2022; Do note that you will be required to return the booked equipment immediately after the number of days and hours of your booking is over.</div>
+<div>&#x2022; For the time being you can only book an equipment for a maximum of 3 days.</div> 
+<div>&#x2022; If you want an equipment for more than that time, you will have to book the equipment again.</div></i></b>
+</div>
+<form method="POST">
+                <!--<input type="text" id="locationinput" value="none"/>-->
+        <div class="container" align="center" >
+            <h1 align="center">Book an Equipment</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Select City</label>
+                    <select name="city" data-live-search="true" id="city" class="form-control" title="Select city" align="center" onchange="updateCity()">
+                    {% for k in cities %}
+                    <option value="{{k}}">{{k}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Select Sub-city</label>
+                    <select name="sub-city" data-live-search="true" id="sub-city" class="form-control" title="Select sub-city" align="center" onchange="updateSubcity()"> </select>
+
+                </div>
+                <div class="col-md-6">
+                    <label>Select Location</label>
+                    <select name="location" data-live-search="true" id="location" class="form-control" title="Select location" align="center" onchange="updateLocation()"> </select>
+
+                </div>
+
+                <div class="col-md-6">
+			<label>Select {{ items[0] }}</label>
+                    <select data-live-search="true" id="equipment" class="form-control" title="Select equipment" align="center" multiple>
+                            {% for k in items[1] %}
+                            <option value={{k}}>{{k}}</option>
+                            {% endfor %}
+		    </select>
+		</div>
+		    {% if 'equip' in request.path %}
+		    <div class="col-md-6">
+			 <label> Select no of days </label> 
+			<select name="days" data-live-search="true" id="days" class="form-control" title="Select no of days" onchange="updatedays()">
+                            {% for i in range(4) %}
+                            {%if i > 0 %}
+                            <option value={{i}}>{{i}}</option>
+                            {% endif %}
+                            {% endfor %}
+                    </select>
+
+		    </div>
+		    {% endif %}
+		    <br />
+                     <div>
+                       <input type="hidden" id="cityinput"/>                <input type="hidden" id="subcityinput" value="none"/>
+                <input type="hidden" id="locationinput" value="none"/>
+		<input type="hidden" name="equipment" id="equipmentinput" value="none"/>
+		    <input type="hidden" id="daysinput" value="1"/>
+		    <input type="hidden" id="ratinginput" value="1"/>
+		     </div>
+                     
+                   <div style="position:absolute; left:45%; top:300px;" align="center">
+          <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+	    </div>
+	</div>
+                <!--<input type="submit" value="Submit" name="Submit"/>-->
+        </form>
+         <script>
+        function updateCity() {
+          let val = document.getElementById("city").value
+          document.getElementById("cityinput").value = val;
+        }
+
+        function updateSubcity() {
+	  let val = document.getElementById("sub-city").value
+                const res = val.split("/");
+                document.getElementById("subcityinput").value = res[1];
+        }
+
+        function updateLocation() {
+          let val = document.getElementById("location").value
+          document.getElementById("locationinput").value += val;
+        }
+	
+	function updaterating() {
+          let val = document.getElementById("rating").value
+          document.getElementById("ratinginput").value = val;
+        }
+
+	
+	 function updatedays() {
+          let val = document.getElementById("days").value
+          document.getElementById("daysinput").value = val;
+        }
+
+
+	var select = document.getElementById("equipment");
+	var input = document.getElementById("equipmentinput");
+	select.addEventListener("change", function(event) {
+	    const selected = document.querySelectorAll('#equipment option:checked');
+	    const values = Array.from(selected).map(el => el.value);
+	    input.value = values.join(', ');
+	})
+
+        </script>
+
+        <!--<button type="submit" class="btn btn-primary">Submit</button>-->
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#city").selectpicker();
+
+                $("#sub-city").selectpicker();
+
+                $("#location").selectpicker();
+
+                $("#equipment").selectpicker();
+
+                $("#days").selectpicker();
+
+
+
+
+                function load_data(url, type, place) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        data: { type: type, place: place },
+                        dataType: "json",
+                        success: function (res) { //alert(category_id)
+                            var html = "";
+                            for (var count = 0; count < res.length; count++) {
+
+                                if (type == "subcityData")
+                                html += '<option value="' + place + '/' + res[count] + '">' + res[count] + "</option>";
+                                else
+                                html += '<option value="' + res[count] + '">' + res[count] + "</option>";
+                            }
+                            if (type == "cityData") {
+                               $("#city").html(html);
+                                $("#city").selectpicker("refresh");
+                            } if (type == "subcityData") {
+                                $("#sub-city").html(html);
+                                $("#sub-city").selectpicker("refresh");
+                            }
+                              if (type == "locationData") {
+                                $("#location").html(html);
+                                $("#location").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#city", function () {
+                   var city_name = $("#city").val();
+                   //let html = '<input type="' + 'text" ' + 'name="' + 'city-input" ' + 'id="' + 'city-input" ' + 'value="' + city_name + '"/>'
+                   load_data('/city', "subcityData", city_name);
+                   //$("#city-div").html(html);
+                   //$("#city-div").selectpicker("refresh");
+                });
+                $(document).on("change", "#sub-city", function () {
+                    var subcity_name = $("#sub-city").val();
+                    load_data('/sub-city', "locationData", subcity_name);
+                });
+
+
+            });
+
+	 function CloseMessage() {
+          let message_box = document.getElementById('message');
+          message_box.style.display = 'none';
+        }
+
+        </script>
+
+</body>
+</html>

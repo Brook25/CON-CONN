@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+
+<style>
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 60%;
+}
+
+
+.table-modal { 
+  position: relative;
+  top: 50px;
+}
+
+
+.content-table {
+	border-collapse: collapse;
+	margin: 25px 0;
+	font-size: 0.9em;
+	min-width: 400px;
+	border-radius: 5px 5px 0 0;
+	overflow: hidden;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: left;
+}
+
+.content-table th,
+.content-table td {
+  padding: 12px 15px;
+}
+
+
+.content-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.content-table tbody tr .center{
+  text-align: center;
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.content-table tbody tr:nth-of-type(even) {
+	background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+	border-bottom: 2px solid #009879;
+}
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  display: block;
+  float: right;
+  top: 5px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+
+.content-table tbody tr:hover {
+  background-color: #ffff99;
+}
+
+
+.content-table .selected {
+  /*background-color: rgba(41, 103, 182, 0.89);*/
+  color: #ff0000;
+}
+.btn {
+position: relative;
+top: 40px;
+left: 48%;
+}
+
+.empty{
+  position: relative;
+  top: 65%;
+  left: 38%;
+}
+
+.inner {
+  position: relative;
+  border-radius: 5px;
+  width: 100%;
+  height: 80%;
+  padding: 1px;
+}
+
+.inner:nth-of-type(even) {
+  background-color: #FFFFCC;
+}
+
+
+.inner:nth-of-type(odd) {
+  background-color: #CCFFCC;
+}
+
+.uname {
+  padding: 13px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: green;
+  font-size: 17px;
+  color: white;
+  border-radius: 50%;
+}
+
+.inner {
+  margin-bottom: 10px;
+}
+
+.Note {
+  position: relative;
+  top: 40px;
+  left: 150px;
+  color: red;
+  font-size: 17px;
+}
+</style>
+	</head>
+	<body>
+		<nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+<div class="Note">
+	{% if 'review' in request.args.get('loc') %}
+	<div><b><i>&#x2022; Please pick one item to view its reviews from one of your previous customers</div>
+	<div>&#x2022; We hope this will help you improve your service.</i></b></div>
+	{% else %}
+	<div><b><i>&#x2022; Please pick one or more items to remove from your list of equipments of materials in the location you have chosen.</div>
+	<div>&#x2022; please make sure you are picking the material or equipment of your choice.</i></b></div>
+	
+	{% endif %}
+</div>
+
+		<div align="center">
+			<div class="close-btn">&times;</div>
+			    <div>
+			      <div class="table-modal">
+			      <div>
+			        <h4>
+				{% if 'review' in request.args.get('loc') %}
+				Select item(s) to view all the reviews.
+				{% else %}
+				Select item(s) to remove from your list of materials or equipments.
+				{% endif %}
+				</h4>
+			      </div>
+			      <div>
+				 <table class="content-table" id="table">
+				<thead>
+				<tr>
+				<th>Name </th>
+				{% if 'eq' in request.args.get('loc')[:2] %}
+				<th>Machine </th>
+				<th>Years used </th>
+				{% endif %}
+				<th>Available </th>
+				<th>Price </th>
+				<th>Rating </th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for item in items %}
+				<tr>
+				<td>{{item.name}}</td>
+				{% if 'eq' in request.args.get('loc')[:2] %}
+				<td>{{item.machine}}</td>
+				<td class="center">{{item.years_used}}</td>
+				{% endif %}
+				<td>{{item.available}}</td>
+				<td>{{item.price}}</td>
+				<td class="center">{{item.rating[0]}}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+
+		</div>
+			      </div>
+			    </div>
+		</div>
+	{% if 'review' in request.args.get('loc') %}
+	<div class="modal" id="modal">
+        	<div class="modal-content">
+                <span id="close" class="close">&times;</span>
+        	<div id="review-title">
+        	<span><h3 align="center">Reviews</h3></span>
+		</div>
+        	<div id="reviews" class="reviews">
+        	</div>
+        	</div>
+        </div>
+	{% else %}
+	<form method="POST">
+	<div>
+	<div>
+	<input type="hidden" name="data" id="input"/>
+	</div>
+	<div>
+	<button type="submit" class="btn btn-primary" align="center">Submit</button>
+	</div>
+	</div>
+	</form>
+	{% endif %}
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<script>
+
+
+
+
+		/*async function get_reviews(url, data) {
+			let uname = data.uname;
+			let loc = data.loc;
+			let name = data.name;
+			let review_div = document.getElementById("reviews");
+			console.log(uname, loc, name);
+			const res = await fetch(url, {
+			  method: "POST",
+			  headers: {'Accept': 'application/json',
+				  'Content-Type': 'application/json'},
+			  body: JSON.stringify({uname: uname, loc: loc, name: name})
+			  });
+			let res_json = await res.json();
+			let val = JSON.parse(res_json);
+			val.map((elem) => {
+				html = '<span>' + '<h3>@' + elem['name'] + ' said: ' +  '<i>"' +  elem['review'] + '"</i>' + '</h3>' + '</span>';
+			  review_div.innerHTML += html;
+			});
+		}*/
+
+
+
+
+                let table = document.getElementById('table');
+		let inputElem = document.getElementById("booksupplier");
+		let modal = document.getElementById('modal');
+		for(let i = 1; i < table.rows.length; i++)
+                  {
+                    table.rows[i].onclick = function()
+                      {
+			 let name = this.cells[0].innerHTML;
+			 if ( {{ request.args.get('loc') | tojson }}.includes('review') ) {
+			   let uname = {{ data[0] | tojson }};
+			   let loc = {{ data[1] | tojson }};
+			   let items = JSON.parse('{{ items | tojson }}')
+			   let review_div = document.getElementById("reviews");
+			   let val = items.find((elem) => elem['name'] === machine_name);
+			 console.log(val);
+			 if (val['reviews'].length > 0)
+			   val['reviews'].map((elem) => {
+			   html = '<div class="inner">' + '<h4><span class="uname">' + elem["username"][0] + '</span> ' +   '&nbsp;&nbsp@' + elem['username'] + ' said: ' +  '<i>"' +  elem['review'] + '"</i>' + '</h4>' + '</div>';
+                          console.log(html);  
+			  review_div.innerHTML += html;
+			  });
+
+			else
+			  review_div.innerHTML = '<span class="empty"><h5>Sorry, Nothing to show here.</h5></span>';
+			  
+			   modal.style.display = "block";
+			 }
+
+			else {
+			  let del_input = document.getElementById('input');
+				if ( del_input.value.includes(machine_name + ', ') ) { 
+			  del_input.value = del_input.value.replace(machine_name  + ', ', '');
+			}
+			else
+			  del_input.value += machine_name + ', ';			 
+			}
+		      }
+		  }
+
+			      //let data = { "uname": uname, "loc": loc, "name": machine_name }
+			      //console.log( typeof uname, loc, machine_name)
+			      //get_reviews("http://127.0.0.1:5001/reviews/equipments", data);
+		      
+			/*document.getElementById("booksupplier").value = this.cells[2].innerHTML;*/
+
+  
+	if (JSON.parse('{{request.args.get('loc') | tojson}}').includes('review') ) {
+        let span = document.getElementById("close");
+	let reviews = document.getElementById("reviews");
+        span.onclick = function() {
+                modal.style.display = "none";
+		reviews.innerHTML = "";
+          }
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+                  modal.style.display = "none";
+		  reviews.innerHTML = "";
+            }
+          }
+	}
+
+	if ({{request.args.get('loc') | tojson}}.includes('review')) {
+		$("tbody tr").click(function() {
+   		$(this).addClass('selected').siblings().removeClass('selected');
+        	console.log('selected');
+	});
+}
+		else {
+		$("tbody tr").click(function() {
+                  if ($(this).hasClass('selected')) {
+                        $(this).removeClass('selected');
+
+                  }
+                  else {
+                    $(this).addClass('selected');
+                  }
+                });
+}
+
+        	</script>
+
+	</body>
+</html>

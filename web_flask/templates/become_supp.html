@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+
+<style>
+
+
+body {
+position: relative;
+
+}
+
+
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  position: absolute;
+  display: block;
+  right: 10px;
+  float: right;
+  top: 15px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+
+
+/*.alert-modal {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%;
+  overflow: auto;
+  background-color: black;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.alert {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 7px;
+  font-size: 20px;
+  width: 30%;
+  height: 20%;
+}
+
+
+.alert-span {
+position: relative;
+left: 10%;
+}*/
+
+/*.alert-modal {
+width: 80%;
+height: 80%;
+opacity: 0.8;
+}
+
+.alert {
+background-color: white;
+position: absolute;
+width: 25%;
+height: 25%;
+left: 50%;
+right: 50%;
+top: 50%;
+transform:translate(-50%, -50%);
+border-radius: 5px;
+}*/
+
+.btn-close {
+position: absolute;
+right: 1px;
+top: 2px;
+height: 30px;
+}
+
+
+.container {
+position: relative;
+top: 40px;
+}
+
+.message {
+  position: absolute;
+  display: block;
+  left: 30%;
+  width: 30%;
+  height: 100px;
+  padding: 0;
+  margin: 0;
+  background-color: #99FF66;
+  font-size: 15px;
+  text-align: center;
+}
+
+.message span {
+  position: relative;
+  right: 5px;
+  float: right;
+  cursor: pointer;
+}
+
+.Note {
+  position: relative;
+  top: 30px;
+  left: 100px;
+  color: red;
+  font-size: 15px;
+}
+
+</style>
+
+
+
+
+</head>
+
+
+
+<body>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+{% if category == 'error' %}
+<div class="message" id="message" style="background-color: #FFCCCB;">{{request.path.split('/')[-1]}} not successfully registered<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+<div>Please fill the fields properly, and resubmit the form</div>
+</div>
+{% else %}
+<div class="message" id="message" style="background-color: #adff29;">{{request.path.split('/')[-1]}} successfully registered<span id="close-message" onclick="CloseMessage()">&times;</span>
+<div>{{message}}</div>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+
+<div class="Note">
+        <div><b><i>&#x2022; Please Make sure to fill out the fields properly and choose the right options. If the fields are not filled properly we won't be able to provide you with the information you need.</div><br />
+                <div>&#x2022; Do note that you will be required to provide credentials for yourself as a supplier and for the materials or equipments you want to register</div>
+<div>&#x2022; If your credentials fail to pass validation. please make sure to check the validity of the credentials before resubmission </div>
+<div>&#x2022; While providing contact info please make sure to provide (a) proper phone number(s).</div> 
+<div>If you provide more than one phone numbers please make sure to put a space and a comma between the sequence of phone numbers.</div>
+<div>&#x2022; Example 0912016319, 0923456728.</div></i></b>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+                <!--<input type="text" id="locationinput" value="none"/>-->
+        <div class="container" align="center">
+	   <h1 align="center">Become a {{items[0]}} Supplier</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Select City</label>
+                    <select name="city" data-live-search="true" id="city" class="form-control" title="Select city" align="center" onchange="updateCity()">
+                    {% for k in cities %}
+                    <option value="{{k}}">{{k}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Select Sub-city</label>
+                    <select name="sub-city" data-live-search="true" id="sub-city" class="form-control" title="Select sub-city" align="center" onchange="updateSubcity()"> </select>
+
+                </div>
+                <div class="col-md-6">
+                    <label>Select Location</label>
+                    <select name="location" data-live-search="true" id="location" class="form-control" title="Select location" align="center" onchange="updateLocation()"> </select>
+
+                </div>
+
+		<div class="col-md-6">
+			<label>Select {{ items[0] }} 1</label>
+                    <select name="it1" data-live-search="true" id="equipment1" class="form-control" title="Select equipment" align="center">
+                            {% for v in items[1] %}
+                            <option value={{v}}>{{v}}</option>
+                            {% endfor %}
+		    </select>
+		</div>
+		 <div class="col-md-6">
+			 <label>Select {{ items[0] }} 2</label>
+                    <select name="it2" data-live-search="true" id="eq2" class="form-control" title="Select equipment" align="center">
+                            {% for v in items[1] %}
+                            <option value={{v}}>{{v}}</option>
+                            {% endfor %}
+                    </select>
+                </div>
+		 <div class="col-md-6">
+			 <label>Select {{ items[0] }} 3</label>
+                    <select name="it3" data-live-search="true" id="equip3" class="form-control" title="Select equipment" align="center">
+                            {% for v in items[1] %}
+                            <option value={{v}}>{{v}}</option>
+                            {% endfor %}
+                    </select>
+		 </div><br /><br /><br />
+		<div style="display: block; float: left;">
+		{% for i in range(4) %}
+		{% if i > 0 %}
+			<div style="display: inline-block;  margin-left: 15px; margin-right: 15px;">
+			<div>
+				<label>For {{ items[0] }} {{i}}</label>
+			</div>
+			{% if items[0][0] == 'E' %}
+			<div>
+			<label>Input number of years used</label>
+			</div>
+			<input name="it{{i}}-yused" id="item{{i}}yused"/>
+			{% endif %}
+			<div>
+			<label>price in Birr</label>
+			</div>
+			<input name="it{{i}}-price" id="item{{i}}price"/>
+			<div>
+			<label>Input credentials</label>
+			</div>
+			<input type="file" name="it{{i}}cred" id="item{{i}}credentials" value=""/>
+			</div>
+		{% endif %} 
+		{% endfor %}
+		</div><br />
+		{% if 'new' in request.path %}
+		<div align="center" style="position: absolute; top: 70%; right: 1px;">
+		<div>
+		<label>Contact Info (phone no)</label>
+		</div>
+		<input name="contactinfo" id="eq1price" value=""/>
+		<div>
+		<label>Supplier Credentials</label>
+		</div>
+		<input type="file" name="personalcred" id="personalcred" value=""/>
+		</div>
+		{% endif %}
+		<div>
+                       <input type="hidden" id="cityinput"/>                <input type="hidden" id="subcityinput" value="none"/>
+                <input type="hidden" id="locationinput" value="none"/>
+		<input type="hidden" id="equipmentinput1" value="none"/>
+		   
+		<input type="hidden" id="equipmentinput2" value="none"/>
+		<input type="hidden" id="equipmentinput3" value="none"/>
+		     </div>
+                     
+                   <div style="position:absolute; left: 45%; top: 460px;" >
+                <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+	    </div>
+	</div>
+                <!--<input type="submit" value="Submit" name="Submit"/>-->
+        </form>
+	<!--{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+	<div class="alert-modal" id="alert-modal">
+	<div class="alert">
+	<button type="button" class="btn-close" id="alert" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	{% if category == 'error' %}
+	<span class="alert-span">Item(s) hasn't been succefully registered</span><br />
+	<span class="alert-span">Please make sure you have properly filled out the form fields</span><br />
+	<i class="fa fa-close"></i>
+	{% else %}
+	<span class="alert-span">Registration succefully completed</span><br />
+	<i class="fa fa-check"></i>
+	{% endif %}			
+	</div>
+	</div>
+	{% endif %}			
+	{% endwith %}-->			
+         <script>
+        function updateCity() {
+          let val = document.getElementById("city").value
+          document.getElementById("cityinput").value = val;
+        }
+
+        function updateSubcity() {
+	  let val = document.getElementById("sub-city").value
+                const res = val.split("/");
+                document.getElementById("subcityinput").value = res[1];
+        }
+
+        function updateLocation() {
+          let val = document.getElementById("location").value
+          document.getElementById("locationinput").value = val;
+        }
+	
+	
+	let but = document.getElementById("alert").addEventListener("click", function () {
+        document.getElementById("alert-modal").style.display = none;
+	});
+
+	
+	function CloseMessage() {
+	  let message_box = document.getElementById('message');
+	  message_box.style.display = 'none';
+	}
+
+
+
+
+	/*var select = document.getElementById("equipment");
+	var input = document.getElementById("equipmentinput");
+	select.addEventListener("change", function(event) {
+	    const selected = document.querySelectorAll('#equipment option:checked');
+	    const values = Array.from(selected).map(el => el.value);
+	    input.value = values.join(', ');*/
+
+        </script>
+
+        <!--<button type="submit" class="btn btn-primary">Submit</button>-->
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#city").selectpicker();
+
+                $("#sub-city").selectpicker();
+
+                $("#location").selectpicker();
+
+                $("#equipment1").selectpicker();
+
+                $("#eq2").selectpicker();
+
+                $("#equip3").selectpicker();
+
+
+
+                function load_data(url, type, place) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        data: { type: type, place: place },
+                        dataType: "json",
+                        success: function (res) { //alert(category_id)
+                            var html = "";
+                            for (var count = 0; count < res.length; count++) {
+
+                                if (type == "subcityData")
+                                html += '<option value="' + place + '/' + res[count] + '">' + res[count] + "</option>";
+                                else
+                                html += '<option value="' + res[count] + '">' + res[count] + "</option>";
+                            }
+                            if (type == "cityData") {
+                               $("#city").html(html);
+                                $("#city").selectpicker("refresh");
+                            } if (type == "subcityData") {
+                                $("#sub-city").html(html);
+                                $("#sub-city").selectpicker("refresh");
+                            }
+                              if (type == "locationData") {
+                                $("#location").html(html);
+                                $("#location").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#city", function () {
+                   var city_name = $("#city").val();
+                   load_data('/city', "subcityData", city_name);
+                });
+                $(document).on("change", "#sub-city", function () {
+                    var subcity_name = $("#sub-city").val();
+                    load_data('/sub-city', "locationData", subcity_name);
+                });
+            });
+        
+        </script>
+
+</body>
+</html>

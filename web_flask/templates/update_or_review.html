@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" /> 
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
+
+<style>
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: black; /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 50%;
+  height: 50%;
+}
+
+
+.modal-body {
+  position: relative;
+  top: -30px;
+
+}
+
+.content-table {
+	border-collapse: collapse;
+	margin: 25px 0;
+	font-size: 0.9em;
+	min-width: 400px;
+	border-radius: 5px 5px 0 0;
+	overflow: hidden;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: left;
+}
+
+.content-table th,
+.content-table td {
+  padding: 12px 15px;
+}
+
+
+.content-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+
+.content-table tbody tr:nth-of-type(even) {
+	background-color: #f3f3f3;
+}
+
+.content-table tbody tr:last-of-type {
+	border-bottom: 2px solid #009879;
+}
+
+
+.content-table tbody tr:hover {
+  background-color: #ffff99;
+}
+
+
+.content-table .selected {
+  /*background-color: rgba(41, 103, 182, 0.89);*/
+  color: #ff0000;
+}
+
+.nav1 {
+  /*background: cadetblue;*/
+  float: right;
+  height: 50px;
+  width: 45%;
+}
+
+.nav_links {
+  position: relative;
+  display: block;
+  float: right;
+  top: 10px;
+  margin-right: 5px;
+}
+
+
+
+.nav_items {
+  display: inline-block;
+  position: relative;
+  line-height: 40px;
+  margin: 0px 5px;
+}
+
+.nav-item{
+position: relative;
+/*top: 12px;*/
+margin-left: 15px;
+}
+
+
+
+
+.nav_x{
+  color: black;
+  font-size: 17px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  /*text-transform: uppercase;*/
+}
+
+.nav_x:hover{
+  transition: .5s;
+  transform: scale(1.03);
+}
+
+
+.fas{
+position: relative;
+width: 70px;
+color: teal;
+height: 40px;
+font-size: 20px;
+text-align: center;
+}
+
+.far{
+position: relative;
+color: teal;
+width: 70px;
+height: 40px;
+font-size: 20px;
+text-align: center;
+
+}
+
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+
+
+#btn1 {
+position: relative;
+top: 35px;
+left: 45%;
+}
+
+.Note {
+  position: relative;
+  top: 30px;
+  left: 100px;
+  color: red;
+  font-size: 15px;
+}
+
+</style>
+	</head>
+	<body>
+		<nav class="nav1">
+                  <ul class="nav_links">
+                          <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
+                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span></a>
+                        </li>
+                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                  </ul>
+         </nav><br /><br />
+<div class="Note">
+	{% if 'Price' in request.args.get('loc') %}
+        <div><b><i>&#x2022; Please Make sure to fill out the price field properly and provide reasonable prices according to the market.</div><br />
+			<div>&#x2022; If you provide unreasonable price acccoridng to the market, the price value will not be set .</div></b></i>
+	{% elif 'availability' in request.args.get('loc') %}
+	<div><b><i>&#x2022; If one of your equipments is out of service or if you don't want to rent it out, or if you have run out of a material feel free to change the visibility of your specified material or equipments</div><br />
+        <div>&#x2022; You can pick as many as three items at once to.</div></b></i>
+	{% else %}
+      <div><b><i>&#x2022; When you change the location of an Equipment or Material please do note that it will be removed from it's previous location and added to your the new location with a new name. Make sure to check the equipments section under the new location.</div><br />
+     <div>&#x2022; Once the location change takes place you will get a notification indicating the new location and its new name</div></b></i>
+
+	{% endif %}
+</div> 
+
+		<div align="center">
+			<b><div class="close-btn">&times;</div>
+			    <div class="modal-dialog">
+			      <div>
+			      <div class="modal-header">
+			        <h4 class="modal-title">
+				Pick an item(s) to change the {{request.args.get('loc').split(':')[1].split('_')[1] }} of
+				</h4>
+			      </div>
+			      <div class="modal-body">
+				 <table class="content-table" id="table">
+				<thead>
+				<tr>
+				<th>Name</th>
+				{% if 'eq' in request.args.get('loc')%}
+				<th>Machine</th>
+				{% endif %}
+				{% if 'eq' in request.args.get('loc')%}
+				<th>Years used</th>
+				{% endif %}
+				<th>Rating</th>
+				<th>Available</th>
+				<th>Price</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for item in items %}
+				<tr>
+				<td>{{item.name}}</td>
+				{% if 'eq' in request.args.get('loc')%}
+				<td>{{item.machine}}</td>
+				{% endif %}
+				{% if 'eq' in request.args.get('loc')%}
+				<td>{{item.years_used}}</td>
+				{% endif %}
+				<td>{{item.rating[0]}}</td>
+				<td>{{item.available}}</td>
+				<td>{{item.price}}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+			      </div>
+			    </div></b>
+		</div>
+
+                 <form method="POST">
+		<input type="hidden" id="data" name="data" value=""/>
+		{% if 'availability' not in request.args.get('loc')%}
+		 <div class="modal" id="modal">
+			 <div class="modal-content">
+                	<span id="close" class="close">&times;</span>
+			{% if 'Price' in request.args.get('loc') %}
+			<div align="center"><h4>Input new price</h4></div>
+			<div align="center">
+                        <input type="text" id="input-data" name="input" value=""/>
+			</div>
+			{% elif 'location' in request.args.get('loc') %}
+			<div align="center">
+            <h1 align="center">Become A Supplier</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Select City</label>
+                    <select name="city" data-live-search="true" id="city" class="form-control" title="Select city" align="center">
+                    {% for k in cities %}
+                    <option value="{{k}}">{{k}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Select Sub-city</label>
+                    <select name="sub-city" data-live-search="true" id="sub-city" class="form-control" title="Select sub-city" align="center"> </select>
+
+                </div>
+                <div class="col-md-6">
+                    <label>Select Location</label>
+                    <select name="location" data-live-search="true" id="location" class="form-control" title="Select location" align="center" onchange="updateLocation()"> </select>
+
+                </div>
+	    </div>
+			</div>
+			{% endif %}
+	    <button type="submit" class="btn btn-primary" id="btn1">Submit</button>
+			</div>
+		</div>
+		{% else %}
+		<button type="submit" class="btn btn-primary" id="btn1">Submit</button>
+		{% endif %}
+		 </form>
+			<div>
+			</div>
+                        </div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+	{% if 'location' in request.args.get('loc') %}
+	<script> 
+ 	
+
+        function updateLocation() {
+          let loc = document.getElementById("location").value;
+	  let sub_city = document.getElementById("sub-city").value.split('/')[1];
+	  let city = document.getElementById("city").value;
+	  let val = city + '/' + sub_city + '/' + loc;
+	  console.log(val);
+          document.getElementById("data").value += val;
+        }
+	
+	$(document).ready(function () {
+                $("#city").selectpicker();
+
+                $("#sub-city").selectpicker();
+
+                $("#location").selectpicker();
+
+                $("#equipment").selectpicker();
+
+
+                function load_data(url, type, place) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        data: { type: type, place: place },
+                        dataType: "json",
+                        success: function (res) { //alert(category_id)
+                            var html = "";
+                            for (var count = 0; count < res.length; count++) {
+
+                                if (type == "subcityData")
+                                html += '<option value="' + place + '/' + res[count] + '">' + res[count] + "</option>";
+                                else
+                                html += '<option value="' + res[count] + '">' + res[count] + "</option>";
+                            }
+                            if (type == "cityData") {
+                               $("#city").html(html);
+                                $("#city").selectpicker("refresh");
+                            } if (type == "subcityData") {
+                                $("#sub-city").html(html);
+                                $("#sub-city").selectpicker("refresh");
+                            }
+                              if (type == "locationData") {
+                                $("#location").html(html);
+                                $("#location").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#city", function () {
+                   var city_name = $("#city").val();
+                   load_data('/city', "subcityData", city_name);
+		});
+
+		$(document).on("change", "#sub-city", function () {
+                    var subcity_name = $("#sub-city").val();
+                    load_data('/sub-city', "locationData", subcity_name);
+                });
+
+
+            });
+
+
+	</script>
+	{% endif %}
+		<script>
+                let table = document.getElementById('table');
+		let inputElem = document.getElementById("data");
+		let end_point = {{ request.args.get('loc') | tojson }};
+		console.log(inputElem, '{{ request.args.get("loc") }}');
+                for(let i = 1; i < table.rows.length; i++)
+                  {
+                    table.rows[i].onclick = function()
+                      {
+			let val = this.cells[0].innerHTML + ':';
+			//console.log(val);
+			if (end_point.includes('Price') || end_point.includes('location'))
+			  inputElem.value = val;
+			      
+			else {
+			if (inputElem.value.includes(val))
+			    inputElem.value = inputElem.value.replace(val, "");
+			else
+			    inputElem.value += val;
+			}
+			if (!(end_point.includes('availability')))
+			  document.getElementsByClassName("modal")[0].style.display = "block";  
+		    }
+                  }
+		</script>
+   		{% if 'availability' in request.args.get('loc') %}
+		<script>
+		$("tbody tr").click(function() {
+		  if ($(this).hasClass('selected')) {
+			$(this).removeClass('selected');
+
+		  }
+		  else {
+		    $(this).addClass('selected');
+		  }
+		});
+		</script>
+		{% else %}
+		<script>
+		let modal = document.getElementById('modal');
+	        console.log(modal);
+		let span = document.getElementById("close");
+        	span.onclick = function() {
+                modal.style.display = "none";
+        	}
+
+        	window.onclick = function(event) {
+          	if (event.target == modal) {
+                  modal.style.display = "none";
+          	}
+        	}
+	
+		$("tbody tr").click(function() {
+   		$(this).addClass('selected').siblings().removeClass('selected');
+        	console.log('selected');
+		});
+        	</script>
+		{% endif %}
+
+	</body>
+</html>
