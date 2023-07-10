@@ -55,6 +55,7 @@ class DBEngine:
 
     def append_or_create(self, dct):
         coll = classes[dct['coll']]
+        print(dct['username'])
         supp = coll.objects(username=dct['username']).first()
         if supp:
             dct['user'] = supp

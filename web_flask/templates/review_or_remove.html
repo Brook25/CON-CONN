@@ -346,7 +346,7 @@ left: 48%;
 			   let loc = {{ data[1] | tojson }};
 			   let items = JSON.parse('{{ items | tojson }}')
 			   let review_div = document.getElementById("reviews");
-			   let val = items.find((elem) => elem['name'] === machine_name);
+			   let val = items.find((elem) => elem['name'] === name);
 			 console.log(val);
 			 if (val['reviews'].length > 0)
 			   val['reviews'].map((elem) => {
@@ -363,11 +363,11 @@ left: 48%;
 
 			else {
 			  let del_input = document.getElementById('input');
-				if ( del_input.value.includes(machine_name + ', ') ) { 
-			  del_input.value = del_input.value.replace(machine_name  + ', ', '');
+				if ( del_input.value.includes(name + ', ') ) { 
+			  del_input.value = del_input.value.replace(name  + ', ', '');
 			}
 			else
-			  del_input.value += machine_name + ', ';			 
+			  del_input.value += name + ', ';			 
 			}
 		      }
 		  }

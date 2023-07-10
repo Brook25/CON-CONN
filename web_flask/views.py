@@ -37,7 +37,7 @@ def query(item):
             details = book.split('-')
 
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$set": { "locations.$[ln].items.$[it].available": False } }, "array_filters": [ {"ln.name": loc['name'], "ln.city": loc['city'], "ln.sub_city": loc['sub_city'] }, {"it.name": details[1]} ] })
-            engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"you have a booked {item} {detail[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
+            engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"you have a booked {item} {details[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
             
             days = 1 if item == 'material' else int(request.args.get('days'))
             booking = {"username": details[0], "location": ('/').join(loc.values()), 'item': item , "name": details[1], 'date': datetime.utcnow()}
@@ -46,7 +46,7 @@ def query(item):
             booked["username"] = uname
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {"$push":  {f"{item}_bookings": booking } } } )
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$push":  {f"booked_{item}s": booked } } })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"You have successfully booked a {item} {detail[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"You have successfully booked a {item} {details[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
         flash(f"Please feel free to add other bookings", "success")
         return redirect(url_for('views.book', item=item))
     return render_template("queries.html", query=query)
@@ -146,6 +146,8 @@ def register(type, item):
         sub_city = form.get('sub-city').split('/')[1]
         location = form.get('location')
         it_lst = [x for x in ['it1', 'it2', 'it3'] if form.get(x)]
+        if item == 'material':
+            it_lst = sorted(list({form.get(it):it for it in it_lst}.values()))
         uname = current_user.username        
         values = []
         try:
@@ -157,7 +159,6 @@ def register(type, item):
             if type == 'new':
                 if (form.get('contactinfo')):
                     contact_info = form.get('contactinfo').split(', ')
-                    print(contact_info)
                     for c in contact_info:
                         print(c)
                         if not (c[:2] == '09' and c.isdigit() and len(c) == 10):
@@ -182,13 +183,19 @@ def register(type, item):
             items = engine.append_or_create(dct)
             if not items:
                 raise ValueError("Similar materials can't be registerd in the same location.")
-            for i in range(len(it_lst)):
+            #if item == 'material' and len(it_lst) != len(items):
+            #    [it_lst.pop(i) for i in range(len(it_lst)) if form.get(it_lst[i]) not in items]
+            #    it_lst.sort()
+            #    items.pop()
+            #    print(it_lst, items)
+
+            for i in range(len(items)):
                 filename = f"{uname}_{location}_{sub_city}_{city}_{items[i]}.jpg"
                 basedir = os.path.abspath(os.path.dirname(__file__))
                 f = request.files[f'{it_lst[i]}cred']
                 f.save(os.path.join(basedir, f'static/images/verification/{item}', filename))
-            for i in it_lst:
-                engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully registered a {item}"], "$position": 0 } } } })
+            for it in items:
+                engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully registered a {item} {it} at {dct['filter']['name']}/{dct['filter']['sub_city']}/{dct['filter']['city']}"], "$position": 0 } } } })
             flash(f"Please check your {item} list", category="success")
         except ValueError as e:
             print(e)
@@ -221,7 +228,6 @@ def supply():
 @views.route('/access_api/<string:end_point>', methods=["GET", "POST"])
 @login_required
 def access_api(end_point):
-    global cities
     user = current_user.username
     url = "http://127.0.0.1:5001/"
     if request.method == "POST":
@@ -238,6 +244,7 @@ def access_api(end_point):
             item = "equipment" if detail.pop(0) == "eq" else "material"
             ep = detail.pop(0)
             if 'remove' in ep:
+                print(change)
                 change = change[:-2].split(', ')
                 data = json.dumps({'uname': user, 'detail': detail[0], 'change': change})
                 res = json.loads(requests.delete(url + f'item/{item}', json=data).json())
@@ -249,7 +256,6 @@ def access_api(end_point):
             data = {'uname': user, 'detail': detail[0], 'change': change}
             res = requests.post(url + f'change/{ep}/{item}', data=data)
             res = json.loads(res.json())
-            engine.update({'coll': 'User', 'row': {'username': user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the {ep} of a {item}"], "$position": 0 } } } })
             return redirect(request.url)
     if end_point == "loc":
         req = request.args.get('loc').split(':')
@@ -263,6 +269,7 @@ def access_api(end_point):
         if 'review' in req:
             return render_template('review_or_remove.html', items=res, data=(user, req[2]))
         if 'Change' in req[1]:
+            cities =  engine.find({'coll': 'PlacesEqs', 'find': {'cities': {"$exists": True}}, 'fields': {}})[0].get('cities')
             return render_template('update_or_review.html', cities=cities, items=res, data=(user, req[2]))
         if 'remove' in req[1]:
             return render_template('review_or_remove.html', items=res, data=(user, req[2]))

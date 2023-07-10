@@ -274,6 +274,7 @@ text-align: center;
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script>"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"</script>
 		<script>
+  			let review_div = document.getElementById('reviews');
 			 async function get_reviews(url, val) {
 			let req = val.split('-');
 			let loc = JSON.parse('{{ request.args['loc'] | tojson}}');
@@ -329,12 +330,14 @@ text-align: center;
 	let modal = document.getElementById("modal");
 	let span = document.getElementById("close");
 	span.onclick = function() {
-                modal.style.display = "none";
+          modal.style.display = "none";
+	  review_div.innerHTML = "";
         }
 
         window.onclick = function(event) {
           if (event.target == modal) {
-                  modal.style.display = "none";
+            modal.style.display = "none";
+	    review_div.innerHTML = "";
           }
         }
 
