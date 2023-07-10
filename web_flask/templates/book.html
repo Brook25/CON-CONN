@@ -7,6 +7,8 @@
          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
 <style>
+
+
 .nav1 {
   /*background: cadetblue;*/
   float: right;
@@ -107,6 +109,23 @@ top: 100px;
 }
 
 
+#user1 {
+  position: relative;
+  top: 0px;
+  margin-left: 15px;
+  line-height: 20px;
+  width: 30px;
+  height: 20px;
+  padding: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: center;
+  font-size: 15px;
+  background-color: #FF5733;
+  border-radius: 50%;
+}
+
+
 </style>
 
 
@@ -134,9 +153,8 @@ top: 100px;
 <nav class="nav1">
                   <ul class="nav_links">
                           <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
-                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
-                        </li>
                         <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
                   </ul>
          </nav><br /><br />
 <div class="Note">

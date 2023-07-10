@@ -12,7 +12,6 @@ import os
 
 
 views = Blueprint('views', __name__)
-cities = {'Addis': {'subcities': {'Kolfe': {'locations': ['tor-hailoch', 'ayer-tena']}, 'lafto': { 'locations': ['weyra', 'akaki']}, 'kaliit': { 'locations': ['total', 'mexico', 'golf-club']}}}, 'Hawassa': {'subcities': {'Atote': {'locations': ['tor-hailoch', 'ayer-tena']}, 'Harar-sefer': { 'locations': ['weyra', 'akaki']}, 'Piassa': { 'locations': ['total', 'mexico', 'golf-club']}}}}
 
 
 
@@ -26,12 +25,9 @@ def home():
 @views.route('/query/<string:item>', methods=["POST", "GET"])
 def query(item):
     query = json.loads(request.args.get('query1'))
-    print(query)
-    #print(query[0]['locations']['items'])
     loc = request.args.get('loc').split('/')
     loc = {"name": loc[0], "sub_city": loc[1], "city": loc[2]}
     if request.method == "POST":
-        print('hello')
         bookings = request.form.get('supp')
         if bookings:
             bookings = bookings[:-2].split(', ')
@@ -40,23 +36,19 @@ def query(item):
         for book in bookings:
             details = book.split('-')
 
-            print(book, details, bookings, loc, item)
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$set": { "locations.$[ln].items.$[it].available": False } }, "array_filters": [ {"ln.name": loc['name'], "ln.city": loc['city'], "ln.sub_city": loc['sub_city'] }, {"it.name": details[1]} ] })
-            engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"One of your {item}s have been booked"], "$position": 0 } } } })
+            engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"you have a booked {item} {detail[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
             
             days = 1 if item == 'material' else int(request.args.get('days'))
             booking = {"username": details[0], "location": ('/').join(loc.values()), 'item': item , "name": details[1], 'date': datetime.utcnow()}
             booking['return_date'] = booking['date'] + timedelta(days=days)
             booked = booking.copy()
             booked["username"] = uname
-            print(booking)
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {"$push":  {f"{item}_bookings": booking } } } )
             engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$push":  {f"booked_{item}s": booked } } })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"You have successfully booked a {item}"], "$position": 0 } } } })
+            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"You have successfully booked a {item} {detail[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
         flash(f"Please feel free to add other bookings", "success")
         return redirect(url_for('views.book', item=item))
-        #return redirect(url_for("views.welcome"))
-    print(query)
     return render_template("queries.html", query=query)
 
 
@@ -66,8 +58,6 @@ def query(item):
 def welcome():
     locations = ["Total", "Mexico", "Piassa"]
     uname = current_user.username
-    #nots = engine.find({'coll': 'User', 'find': {'username': current_user.username}, 'fields': {"notifications": 1, "_id": 0} } )
-    print(uname)
     nots = engine.find({'coll': 'User', 'find': {'username': uname}, 'fields': {"_id": 0, "notifications.num": 1} })[0]['notifications']['num']
     if request.method == "POST":
         city = request.form.get('city')
@@ -77,8 +67,8 @@ def welcome():
         return redirect(url_for('views.query', query=query, loc=loc))
         
 
-        #print(city, sub_city, location, equipment)
     engine.feed_history(current_user.username)
+    cities =  engine.find({'coll': 'PlacesEqs', 'find': {'cities': {"$exists": True}}, 'fields': {}})[0].get('cities')
     return render_template("welcome.html", cities=cities, equipments=equipments, nots=int(nots), uname=current_user.username)
 
 @views.route('/city', methods=["POST", "GET"])
@@ -98,7 +88,6 @@ def sub_city():
        subc_name = name[1]
        cities =  engine.find({'coll': 'PlacesEqs', 'find': {'cities': {"$exists": True}}, 'fields': {}})[0].get('cities')
        res = cities[city_name][subc_name]
-       print(res)
        return jsonify(res)
 
 @views.route('/location', methods=["POST", "GET"])
@@ -299,7 +288,6 @@ def view(item):
             coll = 'EquipmentSuppliers' if input[2] == 'equipment' else 'MaterialSuppliers'
             loc = input[0].split('/')
             place, sub_city, city = loc[0], loc[1], loc[2]
-            print(input)
             if input[2] == 'equipment':
                 engine.update({'coll': coll,'row': {'username': input[1]}, 'update1':{"$set": {"locations.$[l].items.$[i].available": True}}, 'array_filters': [{'l.name': loc[0], 'l.sub_city': loc[1], 'l.city': loc[2]}, {'i.name': input[3]}]})
             engine.update({'coll': 'User', 'row': {"username": current_user.username}, 'update1': {"$pull":  {f"{input[2]}_bookings": {"location": input[0], "name": input[3] } } } })

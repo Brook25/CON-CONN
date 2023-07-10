@@ -407,10 +407,10 @@ color: red;
 <body>
 	 <nav class="nav1">
                   <ul class="nav_links">
-			  <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-home"></i></a></li>
-			  <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
+			  <li class="nav_items"><a href="#" class="nav_x"><i title="Home" class="fas fa-home"></i></a></li>
+			  <li class="nav_items"><a href="#" class="nav_x"><span><i title="notifications" class="fas fa-bell" id="not"></i></span><span class="not">{{ nots }}</span></a>
 			</li>
-			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
+			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span title={{uname}} id="user1">{{current_user.username[0]}}</span></a></li>
                   </ul>
 	 </nav><br /><br />
 
