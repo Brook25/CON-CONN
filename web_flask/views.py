@@ -34,9 +34,10 @@ def query(item):
         uname = current_user.username
         coll = 'EquipmentSuppliers' if item == "equipment" else 'MaterialSuppliers'
         for book in bookings:
-            details = book.split('-')
+            details = book.split(':')
 
-            engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$set": { "locations.$[ln].items.$[it].available": False } }, "array_filters": [ {"ln.name": loc['name'], "ln.city": loc['city'], "ln.sub_city": loc['sub_city'] }, {"it.name": details[1]} ] })
+            if item == 'equipment':
+                engine.update({'coll': coll, 'row': {'username': details[0]}, 'update1': {"$set": { "locations.$[ln].items.$[it].available": False } }, "array_filters": [ {"ln.name": loc['name'], "ln.city": loc['city'], "ln.sub_city": loc['sub_city'] }, {"it.name": details[1]} ] })
             engine.update({'coll': 'User', 'row': {'username': details[0]}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": {"$each": [f"you have a booked {item} {details[1]} at {loc['city']}/{loc['sub_city']}/{loc['name']}"], "$position": 0 } } } })
             
             days = 1 if item == 'material' else int(request.args.get('days'))
@@ -114,6 +115,7 @@ def book(item):
             sub_city = request.form.get('sub-city')
             location = request.form.get('location')
             eqs = request.form.get('equipment')
+            print(eqs, city, sub_city, location)
             if not (city and sub_city and location and eqs):
                 raise ValueError("fields not properly filled.")
             if item == 'equipment' and not request.form.get('days'):
@@ -122,6 +124,7 @@ def book(item):
             query1 = engine.find({'coll': coll, 'agg': [ {"$match": {"username": {"$not": {"$eq": uname}}}}, {"$unwind": "$locations"}, {"$unwind": "$locations.items"}, {"$match": {"locations.name": location, "locations.city": city, "locations.sub_city": sub_city, f"locations.items.{selector}": { "$in": eqs }, "locations.items.available": True } }, {"$project": {"_id": 0, "username": 1, "locations.items": 1, "contact_info": 1} }] })
             query1 = sorted(sorted(query1, key=lambda x: x['locations']['items'].get('name')), key=lambda x: x.get('username'))
             loc = f"{location}/{sub_city}/{city}"
+            print(query1)
             return redirect(url_for('views.query', item=item, query1=json.dumps(query1), loc=loc, days=request.form.get('days')))
         except Exception as e:
             flash(str(e), category='error')
@@ -248,11 +251,11 @@ def access_api(end_point):
                 change = change[:-2].split(', ')
                 data = json.dumps({'uname': user, 'detail': detail[0], 'change': change})
                 res = json.loads(requests.delete(url + f'item/{item}', json=data).json())
-                engine.update({'coll': 'User', 'row': {'username': user}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully removed an {item}"], "$position": 0 } } } })
                 return redirect(request.url)
             ep = ep.split('_')[1]
             if 'Price' in ep:
                 change += request.form.get('input')
+            print(change)
             data = {'uname': user, 'detail': detail[0], 'change': change}
             res = requests.post(url + f'change/{ep}/{item}', data=data)
             res = json.loads(res.json())

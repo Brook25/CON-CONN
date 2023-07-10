@@ -154,7 +154,7 @@ text-align: center;
 
 .empty {
   position: absolute;
-  top: 20%;
+  top: 40%;
   left: 36%;
 }
 
@@ -162,9 +162,9 @@ text-align: center;
 #sad {
   position: absolute;
   color: crimson;
-  top: 200px;
+  top: 48%;
   left: 45%;
-  font-size: 40px;
+  font-size: 30px;
 }
 
 .inner {
@@ -194,8 +194,14 @@ text-align: center;
   border-radius: 50%;
 }
 
-.inner {
-  margin-bottom: 10px;
+.Note {
+  position: relative;
+  top: 40px;
+  left: 120px;
+  color: red;
+  font-size: 17px;
+}
+
 </style>
 	</head>
 	<body>
@@ -207,6 +213,13 @@ text-align: center;
                         <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
                   </ul>
          </nav><br /><br />
+	 <div class="Note">
+        <div><b><i>&#x2022; You can view reviews of any item of your choice by clicking on it. If you don't choose to book the item, then you can click on it again to avoid booking it</div>
+        <div>&#x2022; Once you click on a row with the item of your choice, the color of the text within the row changes to red. You can reclick on the row to avoid picking it.</i></b></div>
+        <div><b><i>&#x2022; Please try to reach out and contact the supplier before booking their material or equipment</div>
+        <div>&#x2022; You can pick upto three items at once. If you pick more than three items at once, only the first three will be added to your booking list.</div>
+        <div>&#x2022; If you want to book more than three items at once, You will have to repeat the process. Thank You!</i></b></div>
+	 </div>
 
 		<div align="center">
 			     {% if query %}
@@ -276,7 +289,7 @@ text-align: center;
 		<script>
   			let review_div = document.getElementById('reviews');
 			 async function get_reviews(url, val) {
-			let req = val.split('-');
+			let req = val.split(':');
 			let loc = JSON.parse('{{ request.args['loc'] | tojson}}');
   			let review_div = document.getElementById('reviews');
 			const res = await fetch(url, {
@@ -308,7 +321,7 @@ text-align: center;
                   {
                     table.rows[i].onclick = function()
                       {
-			let val = this.cells[0].innerHTML + '-' + this.cells[1].innerHTML + ', ';
+			let val = this.cells[0].innerHTML + ':' + this.cells[1].innerHTML + ', ';
 			      if (inputElem.value.includes(val)) {
 				inputElem.value = inputElem.value.replace(val, "");
 				console.log(inputElem.value, val);

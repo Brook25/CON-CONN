@@ -63,6 +63,7 @@ class Items(Resource):
         engine.update({'coll': coll, 'row': {"username": data['uname']},
             'update1': {"$pull": {"locations.$[l].items": {"name": {"$in": data['change'] } } } },
             'array_filters': [{"l.name": name, "l.city": city, "l.sub_city": sub_city}] })
+        engine.update({'coll': 'User', 'row': {'username': data['uname']}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully removed {' '.join(data['change'])} at {name}/{sub_city}/{city}"], "$position": 0 } } } })
         return json.dumps({"res": 'OK'})
 
     @staticmethod
@@ -223,11 +224,16 @@ class Change(Resource):
                 engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the location of a {item} {change[0]} from {loc[0]}/{loc[2]}/{loc[1]} to {new_loc[2]}/{new_loc[1]}/{new_loc[0]}"], "$position": 0 } } } })
         else:
             change.pop()
+            print(change, change[0][-1])
             query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname} } , {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.city": loc[1], "locations.sub_city": loc[2]}}, {"$project": {"locations.items": {"$filter": {"input": "$locations.items", "as": "inner_doc", "cond": {"$in": ["$$inner_doc.name", change] } } } } } ] })[0]['locations']['items']
             av = dict([[item['name'].lower(), not(item['available'])] for item in query])
+            it_names = sorted([item['name'] for item in query])
             update1 = {f"locations.$[l].items.$[{k.replace('-', '').replace(' ', '')}].available":  av[k] for k in sorted(av.keys())}
-            array_filters = [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}]+ [{f"{k.replace('-', '').replace(' ', '')}.name": k[0].upper() + k[1:]} for k in sorted(av.keys())]
+            print(update1)
+            array_filters = [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}]+ [{f"{k.lower().replace('-', '').replace(' ', '')}.name": k} for k in it_names]
+            print(array_filters)
             dct = {'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters}
+            print(dct)
             engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters})
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the visibility of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
             

@@ -168,8 +168,16 @@ left: 48%;
 
 .empty{
   position: relative;
-  top: 65%;
+  top: 40%;
   left: 38%;
+}
+
+#sad {
+  position: absolute;
+  color: crimson;
+  top: 50%;
+  left: 47%;
+  font-size: 30px;
 }
 
 .inner {
@@ -231,7 +239,7 @@ left: 48%;
 	
 	{% endif %}
 </div>
-
+		{% if items %}
 		<div align="center">
 			<div class="close-btn">&times;</div>
 			    <div>
@@ -302,7 +310,10 @@ left: 48%;
 	</div>
 	</form>
 	{% endif %}
-
+	{% else %}
+          <div class="empty"><h4>Sorry, Nothing to show for now. Come back later</h4></div>
+	<div><i id="sad" class="fas fa-sad-cry"></i></div>
+         {% endif %}
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 		<script>

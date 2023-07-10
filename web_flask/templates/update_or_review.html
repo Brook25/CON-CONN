@@ -203,6 +203,7 @@ left: 45%;
 </div> 
 
 		<div align="center">
+			{% if items %}
 			<b><div class="close-btn">&times;</div>
 			    <div class="modal-dialog">
 			      <div>
@@ -247,6 +248,10 @@ left: 45%;
 		</div>
 			      </div>
 			    </div></b>
+		 {% else %}
+                <div class="empty"><h4>Sorry, Nothing to show for now. Come back later</h4></div>
+		<div><i id="sad" class="fas fa-sad-cry"></i></div>
+                {% endif %}
 		</div>
 
                  <form method="POST">
