@@ -14,9 +14,8 @@
       href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
       crossorigin="anonymous"
     />
-
-    <title>{% block title %}Home{% endblock %}</title>
-<style>
+    <title>{% block title %}User {{ request.path.split('/')[-1]}}{% endblock %}</title>
+    <style>
 body {
   background-image: url('/static/images/auth2.png'); 
 }

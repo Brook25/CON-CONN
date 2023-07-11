@@ -7,6 +7,40 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap">
 
 <style>
+#logo{
+  position: relative;
+  top: -30px;
+  text-align: center;
+  display: flex;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  margin: 10px 0 0 10px;
+}
+
+
+img {
+ width: 45px;
+ height: 45px;
+ border-radius: 50%;
+}
+
+
+
+
+#logo img{
+ width: 45px;
+ height: 45px;
+ border-radius: 50%;
+}
+
+#logo span{
+ position: relative;
+ top: 10px;
+ font-weight: bold;
+ padding-left: 15px;
+ font-size: 18px;
+ text-transform: uppercase;
+}
 
 .modal {
   display: none; /* Hidden by default */
@@ -21,7 +55,10 @@
   background-color: black; /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
-
+.modal-dialog{
+  position: relative;
+  top: 40px;
+}
 /* Modal Content */
 .modal-content {
   background-color: #fefefe;
@@ -199,7 +236,7 @@ left: 45%;
                   <ul class="nav_links">
                           <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
                         <li class="nav_items"><a href="{{url_for('auth.logout')}}" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
-			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
+			<li class="nav_items"><a href="#" class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
                         </li>
                   </ul>
          </nav><br /><br />
