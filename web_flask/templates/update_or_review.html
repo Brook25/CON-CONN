@@ -165,7 +165,7 @@ text-align: center;
 
 #btn1 {
 position: relative;
-top: 35px;
+top: 25px;
 left: 45%;
 }
 
@@ -177,17 +177,35 @@ left: 45%;
   font-size: 15px;
 }
 
+#user1 {
+  position: relative;
+  top: 0px;
+  margin-left: 15px;
+  line-height: 20px;
+  width: 30px;
+  height: 20px;
+  padding: 14px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: center;
+  font-size: 15px;
+  background-color: #FF5733;
+  border-radius: 50%;
+}
 </style>
 	</head>
 	<body>
 		<nav class="nav1">
                   <ul class="nav_links">
                           <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
-                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span></a>
+                        <li class="nav_items"><a href="{{url_for('auth.logout')}}" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+			<li class="nav_items"><a href={{url_for('auth.logout')}} class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
                         </li>
-                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
                   </ul>
          </nav><br /><br />
+<a href="#" id="logo">
+<img src="/static/images/conn.PNG" alt="">
+<span class="nav-item"><em>Con-Conn </em></span></a>
 <div class="Note">
 	{% if 'Price' in request.args.get('loc') %}
         <div><b><i>&#x2022; Please Make sure to fill out the price field properly and provide reasonable prices according to the market.</div><br />
@@ -204,8 +222,7 @@ left: 45%;
 
 		<div align="center">
 			{% if items %}
-			<b><div class="close-btn">&times;</div>
-			    <div class="modal-dialog">
+			<b><div class="modal-dialog">
 			      <div>
 			      <div class="modal-header">
 			        <h4 class="modal-title">
@@ -261,13 +278,14 @@ left: 45%;
 			 <div class="modal-content">
                 	<span id="close" class="close">&times;</span>
 			{% if 'Price' in request.args.get('loc') %}
-			<div align="center"><h4>Input new price</h4></div>
+			<div align="center"><h3>Input new price </h3></div>
+			<div align="center"><h5>Please make sure to add a resonable price according to market value</h5></div>
 			<div align="center">
                         <input type="text" id="input-data" name="input" value=""/>
 			</div>
 			{% elif 'location' in request.args.get('loc') %}
 			<div align="center">
-            <h1 align="center">Become A Supplier</h1>
+            <h1 align="center">Pick a new location</h1>
             <div class="row">
                 <div class="col-md-6">
                     <label>Select City</label>

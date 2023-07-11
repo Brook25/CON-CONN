@@ -6,6 +6,38 @@
          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
 
 <style>
+#logo{
+  text-align: center;
+  display: flex;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  margin: 10px 0 0 10px;
+}
+
+
+img {
+ width: 45px;
+ height: 45px;
+ border-radius: 50%;
+}
+
+
+
+
+#logo img{
+ width: 45px;
+ height: 45px;
+ border-radius: 50%;
+}
+
+#logo span{
+ position: relative;
+ top: 10px;
+ font-weight: bold;
+ padding-left: 15px;
+ font-size: 18px;
+ text-transform: uppercase;
+}
 
 .modal {
   display: none; /* Hidden by default */
@@ -79,6 +111,8 @@
 	border-bottom: 2px solid #009879;
 }
 .nav1 {
+  position: relative;
+  top: -55px;
   /*background: cadetblue;*/
   float: right;
   height: 50px;
@@ -213,20 +247,45 @@ left: 48%;
 
 .Note {
   position: relative;
-  top: 40px;
+  top: 10px;
   left: 150px;
   color: red;
   font-size: 17px;
+
 }
+
+.nav_x {
+  text-decoration: none;
+}
+
+#user1 {
+  position: relative;
+  top: 0px;
+  margin-left: 15px;
+  line-height: 20px;
+  width: 30px;
+  height: 20px;
+  padding: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  text-align: center;
+  font-size: 15px;
+  background-color: #FF5733;
+  border-radius: 50%;
+}
+
 </style>
 	</head>
 	<body>
+<a href="#" id="logo">
+<img src="/static/images/conn.PNG" alt="">
+<span class="nav-item"><em>Con-Conn </em></span></a>
 		<nav class="nav1">
                   <ul class="nav_links">
                           <li class="nav_items"><a href="{{url_for('views.welcome')}}" class="nav_x"><i class="fas fa-home"></i></a></li>
-                          <li class="nav_items"><a href="#" class="nav_x"><span><i class="fas fa-bell" id="not"></i></span></a>
                         </li>
-                        <li class="nav_items"><a href="#" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+                        <li class="nav_items"><a href="{{url_for('auth.logout')}}" class="nav_x"><i class="fas fa-sign-out-alt"></i></a></li>
+			<li class="nav_items"><a href="#" class="nav_x"><span id="user1">{{current_user.username[0]}}</span></a></li>
                   </ul>
          </nav><br /><br />
 <div class="Note">
@@ -241,7 +300,6 @@ left: 48%;
 </div>
 		{% if items %}
 		<div align="center">
-			<div class="close-btn">&times;</div>
 			    <div>
 			      <div class="table-modal">
 			      <div>

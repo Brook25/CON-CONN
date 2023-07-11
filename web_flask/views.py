@@ -293,7 +293,7 @@ def access_api(end_point):
 @views.route('/view/<string:item>', methods=["POST", "GET"])
 def view(item):
     if request.method == "POST":
-        if item == 'boo:kings':
+        if item == 'bookings':
             input = request.form.get('input').split(':')
             coll = 'EquipmentSuppliers' if input[2] == 'equipment' else 'MaterialSuppliers'
             loc = input[0].split('/')
@@ -326,11 +326,12 @@ def view(item):
         booked_eq = engine.find({'coll': 'EquipmentSuppliers', 'find': {'username': current_user.username}, 'fields': {'booked_equipments': 1, '_id': 0} }) 
         if booked_eq:
             booked_eq = booked_eq[0]['booked_equipments']
-        booked_eq = sorted(sorted(booked_eq, key=lambda x: x.get('name')), key=lambda x: x.get('usrename'))
+            print(booked_eq)
+            booked_eq = sorted(sorted(booked_eq, key=lambda x: x.get('name')), key=lambda x: x.get('username'))
         booked_mt = engine.find({'coll': 'MaterialSuppliers', 'find': {'username': current_user.username}, 'fields': {'booked_materials': 1, '_id': 0} })
         if booked_mt:
             booked_mt = booked_mt[0]['booked_materials']
-        booked_mt = sorted(sorted(booked_mt, key=lambda x: x.get('name')), key=lambda x: x.get('usrename'))
+            booked_mt = sorted(sorted(booked_mt, key=lambda x: x.get('name')), key=lambda x: x.get('username'))
         return render_template('booked.html', data=(booked_eq, booked_mt))
     if item == 'equipments' or item == 'materials':
         data = sorted(data, key=lambda x: x.get('name'))
