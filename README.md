@@ -27,7 +27,8 @@ CON-CONN is a simple app that aims to bridge the gap between contractors and Equ
 1. Clone the repository
 2. Install dependencies: `pip install -r requirements.txt`
 3. Set environment variables: `cp .env.example .env` and update the values in `.env` with your own settings
-4. Start the server: `flask run`
+4. Start the web server by running the main file: `./main.py`
+5. On another terminal Start the api server: `./api/main.py`
 
 ### Usage
 
