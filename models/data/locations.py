@@ -15,8 +15,8 @@ class MLocation(mongoengine.EmbeddedDocument):
     def append(cls, dct):
         coll = Equipment if dct['coll'][0] == "E" else Material
         items = [coll(**(it)) for it in dct['append']]
-        loc = cls(name=dct['filter']['name'], city=dct['filter']['city'], sub_city=dct['filter']['sub_city'],
-               items=items)
+        dct['items'] = items
+        loc = cls(**dct['filter'])
         dct['user'].locations.append(loc)
         dct['user'].save()
         return items

@@ -327,18 +327,18 @@ def view(item):
         if booked_eq:
             booked_eq = booked_eq[0]['booked_equipments']
             print(booked_eq)
-            booked_eq = sorted(sorted(booked_eq, key=lambda x: x.get('name')), key=lambda x: x.get('username'))
+            booked_eq = sorted(booked_eq, key=lambda x: x.get('date'), reverse=True)
         booked_mt = engine.find({'coll': 'MaterialSuppliers', 'find': {'username': current_user.username}, 'fields': {'booked_materials': 1, '_id': 0} })
         if booked_mt:
             booked_mt = booked_mt[0]['booked_materials']
-            booked_mt = sorted(sorted(booked_mt, key=lambda x: x.get('name')), key=lambda x: x.get('username'))
+            booked_mt = sorted(booked_mt, key=lambda x: x.get('date'), reverse=True)
         return render_template('booked.html', data=(booked_eq, booked_mt))
     if item == 'equipments' or item == 'materials':
         data = sorted(data, key=lambda x: x.get('name'))
         for loc in data:
             loc['items'] = sorted(loc['items'], key=lambda x: x.get('name'))
     else:
-        data = sorted(sorted(data, key=lambda x: x.get('name')), key=lambda x: x.get('date'), reverse=True)
+        data = sorted(data, key=lambda x: x.get('date'), reverse=True)
     return render_template('bookings_and_items.html', data=data)
 
 
@@ -361,7 +361,7 @@ def check(option):
             raise(ValidationError)
             flash(f"{option} successfuly done", category='success')
         except Exception:
-            flash("operation did not succesfuly completed!", category="danger")
+            flash("operation succesfuly completed!", category="danger")
         return redirect(request.url)
     coll = 'ValItem' if option == 'item' else 'ValSupp'
     validate = engine.find({'coll': coll, 'find': {}, 'fields': {}})

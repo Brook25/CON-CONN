@@ -196,15 +196,23 @@ top: 100px;
                   </ul>
          </nav><br /><br />
 <div class="Note">
-	<div><b><i>&#x2022; Please Make sure to fill out the fields properly and choose the right options. If the fields are not filled properly we won't be able to provide you with the information you need.</div><br />
+	<b><i><div>&#x2022; Please Make sure to fill out the fields properly and choose the right options. If the fields are not filled properly we won't be able to provide you with the information you need.</div><br />
 		<div>&#x2022; Do note that you will be required to return the booked equipment immediately after the number of days and hours of your booking is over.</div>
 <div>&#x2022; For the time being you can only book an equipment for a maximum of 3 days.</div> 
-<div>&#x2022; If you want an equipment for more than that time, you will have to book the equipment again.</div></i></b>
+<div>&#x2022; If you want an equipment for more than that time, you will have to book the equipment again.</div>
+{% if 'mat' in request.path %}
+<div>&#x2022; If you are looking to purchase a material and are not familiar with units for material types, you may <a href="https://con.2merkato.com/prices/cat/3">click here</a> to check the units.</div>
+{% endif %}
+</i></b>
 </div>
 <form method="POST">
                 <!--<input type="text" id="locationinput" value="none"/>-->
         <div class="container" align="center" >
+	    {% if 'equip' in request.path %}
             <h1 align="center">Book an Equipment</h1>
+	    {% else %}
+            <h1 align="center">Book a Material</h1>
+	    {% endif %}
             <div class="row">
                 <div class="col-md-6">
                     <label>Select City</label>

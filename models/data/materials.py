@@ -10,9 +10,8 @@ class Material(mongoengine.EmbeddedDocument):
 
     @classmethod
     def append(cls, dct):
-        materials = [cls(**(eq)) for eq in dct['append']]
+        materials = [cls(**(it)) for it in dct['append']]
         loc = dct['user'].locations.filter(**(dct['filter'])).first()
-        print(loc, loc.to_mongo())
         [loc.items.append(mt) for mt in materials]
         dct['user'].save()
 

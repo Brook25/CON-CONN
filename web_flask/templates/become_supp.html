@@ -275,7 +275,11 @@ top: 40px;
 <form method="POST" enctype="multipart/form-data">
                 <!--<input type="text" id="locationinput" value="none"/>-->
         <div class="container" align="center">
+	    {% if 'new' in  request.path %}
 	   <h1 align="center">Become a {{items[0]}} Supplier</h1>
+	   {% else %}
+	   <h1 align="center">Add a {{items[0]}}(s)</h1>
+	   {% endif %}
             <div class="row">
                 <div class="col-md-6">
                     <label>Select City</label>
