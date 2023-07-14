@@ -1,6 +1,6 @@
-# CON-CONN
+# CON-connect
 
-CON-CONN is a simple app that aims to bridge the gap between contractors and Equipment and Material suppliers in the construction industry. The app allows building contractors to easily find suppliers in nearby locations.
+CON-connect is a simple app that aims to bridge the gap between contractors and Equipment and Material suppliers in the construction industry. The app allows building contractors to easily find suppliers in nearby locations.
 
 ## Features
 
