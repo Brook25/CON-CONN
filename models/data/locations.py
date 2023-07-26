@@ -5,6 +5,7 @@ from .materials import Material
 
 
 class MLocation(mongoengine.EmbeddedDocument):
+    """matetial location document schema"""
     name = mongoengine.StringField(required=True)
     city = mongoengine.StringField(required=True)
     sub_city = mongoengine.StringField(required=True)
@@ -13,6 +14,10 @@ class MLocation(mongoengine.EmbeddedDocument):
 
     @classmethod
     def append(cls, dct):
+        """class method to embed new location along with
+           equipment or material embedded documents
+           to an existing user document.
+        """
         coll = Equipment if dct['coll'][0] == "E" else Material
         items = [coll(**(it)) for it in dct['append']]
         dct['items'] = items

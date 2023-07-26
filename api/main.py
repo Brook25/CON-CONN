@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+"""Api endpoint classes"""
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -16,8 +16,15 @@ api = Api(app)
 
 
 class Locations(Resource):
+    """location endpoint. Based on item_type
+       returns available locations fori
+       equipments, materials or both.
+    """
 
     def get(self, item_type):
+        """resonds to get requests to the api,
+        returns available locations.
+        """
         if item_type == "all":
             print(request.args)
             e = engine.find({'coll': 'EquipmentSuppliers', 'find': {"username": request.args.get('uname') }, 'fields': {} })
@@ -30,13 +37,16 @@ class Locations(Resource):
             m = [f'{x["name"]}/{x["city"]}/{x["sub_city"]}' for x in m]
             return jsonify({"e": e, "m": m})
     
-    def post(self, item_type):
-        if item_type == "all":
-            pass
 
 class Items(Resource):
+    """Perform queries on registered materials
+       or equipments based on a given location
+    """
 
     def get(self, item_type):
+        """Get registered equipments or matrials
+           from a given location based on supplier username.
+        """
         if 'locations' in request.args:
             uname = request.args.get('user')
             location = request.args.get('locations').split('/')
@@ -47,14 +57,11 @@ class Items(Resource):
             query = engine.find({"coll": coll, "find": {"username": uname}, "fields": {} })[0]['locations']
             res = [loc for loc in query if loc['name'] == name and loc['city'] == city and loc['sub_city'] == sub_city][0]['items']
             return json.dumps(res)
-    def post(self, item_type):
-        post_args = reqparse.RequestParser()
-        post_args.add_argument("location", type="str", help="Location is required", required=True)
-        post_args.add_argument("items", type="str", help="A list of materials is required", required=True)
-        post_args = post_args.parse_args()
-        return None
         
     def delete(self, item_type):
+        """Delete an equipment or a material of
+        a suppier based on a given location.
+        """
         data = json.loads(request.json)
         detail = data.get('detail').split('/')
         name, city, sub_city = detail[0], detail[1], detail[2]
@@ -102,13 +109,11 @@ class Complaints(Resource):
 
 
 class Reviews(Resource):
-    def get(self, item_or_task):
-        if 'user_id' in request.args and 'location' in request.args\
-                and 'name' in request.args:
-            pass
-        return None
-    
+    """Perform queries on  reviews of materials
+       or equipments based on a given location
+    """
     def post(self, item_or_task):
+        """Adds or returns reviews for a particular material or equipment"""
         if item_or_task != "add_review":
             coll = 'MaterialSuppliers' if item_or_task == 'materials' else 'EquipmentSuppliers'
             req = request.json
@@ -143,25 +148,9 @@ class Reviews(Resource):
             return 'Not Done', 200
 
         
-        
-
-    def delete(self, item_or_task):
-        if locations in request.args and locations:
-            for item in items:
-                pass
-        return None
-
-    @staticmethod
-    def abort_if_not_item_type(item_type):
-        if item_type not in ['Equipments', 'Materials']:
-            abort("Item type not found")
-
-        return None
-
-
 class History(Resource):
+    """Fetches history of a user's activites"""
     def get(self, user):
-        print(user)
         history = engine.find({'coll': 'User', 'find': {"username": user}, 'fields': {"history": 1, "_id": 0} })[0]['history']
         for h in history:
             h['date'] = h['date'].isoformat()
@@ -171,6 +160,7 @@ class History(Resource):
 
 
 class Notification(Resource):
+    """Adds and fetches notifications for a user"""
     def get(self, notn):
         uname = request.args.get('uname')
         if notn > 0:
@@ -181,6 +171,9 @@ class Notification(Resource):
 
 
 class Change(Resource):
+    """Performs updates and changes on specific
+       material and equipment data
+    """
     def post(self, option, item):
         uname = request.form.get('uname')
         loc = request.form.get('detail').split('/')
@@ -198,13 +191,11 @@ class Change(Resource):
                 query = engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {} })[0]['locations']
                 for l in query:
                     if l['city'] == loc[1] and l['sub_city'] == loc[2] and l['name'] == loc[0]:
-                        print(l)
                         for it in l['items']:
                             if it['name'] == change[0]:
                                 pull = it
                                 break
                     elif item == "equipment" and l['city'] == new_loc[0] and l['sub_city'] == new_loc[1] and l['name'] == new_loc[2]:
-                        print(l)
                         for it in l['items']:
                             if it['machine'] in change[0]:
                                 count += 1
@@ -224,16 +215,12 @@ class Change(Resource):
                 engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the location of a {item} {change[0]} from {loc[0]}/{loc[2]}/{loc[1]} to {new_loc[2]}/{new_loc[1]}/{new_loc[0]}"], "$position": 0 } } } })
         else:
             change.pop()
-            print(change, change[0][-1])
             query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname} } , {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.city": loc[1], "locations.sub_city": loc[2]}}, {"$project": {"locations.items": {"$filter": {"input": "$locations.items", "as": "inner_doc", "cond": {"$in": ["$$inner_doc.name", change] } } } } } ] })[0]['locations']['items']
             av = dict([[item['name'].lower(), not(item['available'])] for item in query])
             it_names = sorted([item['name'] for item in query])
             update1 = {f"locations.$[l].items.$[{k.replace('-', '').replace(' ', '')}].available":  av[k] for k in sorted(av.keys())}
-            print(update1)
             array_filters = [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}]+ [{f"{k.lower().replace('-', '').replace(' ', '')}.name": k} for k in it_names]
-            print(array_filters)
             dct = {'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters}
-            print(dct)
             engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters})
             engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the visibility of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
             

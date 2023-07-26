@@ -6,6 +6,7 @@ from .booking import Booking
 
 
 class MaterialSuppliers(mongoengine.Document):
+    """material supplier document schema"""
     username = mongoengine.StringField(required=True)
     locations = mongoengine.EmbeddedDocumentListField(MLocation)
     contact_info = mongoengine.ListField(mongoengine.StringField(required=True))

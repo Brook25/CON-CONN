@@ -5,6 +5,7 @@ from .booking import Booking
 from models.data.locations import ELocation, MLocation
 
 class EquipmentSuppliers(mongoengine.Document):
+    """equipment supplier document schema"""
     username = mongoengine.StringField(required=True)
     locations = mongoengine.EmbeddedDocumentListField(ELocation)
     contact_info = mongoengine.ListField(StringField(required=True))

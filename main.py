@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+"""App starter module"""
 from web_flask import create_app
 
 
