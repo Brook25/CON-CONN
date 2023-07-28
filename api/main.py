@@ -78,7 +78,8 @@ class Items(Resource):
         engine.update({'coll': 'User', 'row': {'username': 
             data['uname']}, 'update1': { "$inc": { "notifications.num": 1 },
                 "$push": {"notifications.notes": { "$each":
-                    [f"You have successfully removed {' '.join(data['change'])} at {name}/{sub_city}/{city}"], "$position": 0 } } } })
+                    [f"You have successfully removed {' '.join(data['change'])}\
+                            at {name}/{sub_city}/{city}"], "$position": 0 } } } })
         return json.dumps({"res": 'OK'})
 
     @staticmethod
@@ -96,7 +97,8 @@ class Complaints(Resource):
     def post(self):
         post_args = reqparse.RequestParser()
         post_args.add_argument("user_id", type="str", help="Location is required", required=True)
-        post_args.add_argument("complaint", type="str", help="A list of materials is required", required=True)
+        post_args.add_argument("complaint", type="str", help="A list of materials is required",
+                required=True)
         post_args.add_argument("by", type="str", help="id of the complainer is needed")
         post_args = post_args.parse_args()
         return None
@@ -133,7 +135,8 @@ class Reviews(Resource):
                     loc[0], "locations.sub_city": loc[1], "locations.city": 
                     loc[2] } }, {"$unwind": "$locations.items"},
                 {"$match": {"locations.items.name": name}},
-                {"$project": {'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items'].get('reviews')
+                {"$project": {'locations.items.reviews':
+                    1, '_id': 0}} ] })[0]['locations']['items'].get('reviews')
             return json.dumps(reviews)
         
         else:
@@ -175,7 +178,8 @@ class Reviews(Resource):
 class History(Resource):
     """Fetches history of a user's activites"""
     def get(self, user):
-        history = engine.find({'coll': 'User', 'find': {"username": user}, 'fields': {"history": 1, "_id": 0} })[0]['history']
+        history = engine.find({'coll': 'User', 'find': {"username": user},
+            'fields': {"history": 1, "_id": 0} })[0]['history']
         for h in history:
             h['date'] = h['date'].isoformat()
             h['return_date'] = h['return_date'].isoformat()
@@ -192,7 +196,8 @@ class Notification(Resource):
                 'update1': {'$set': {'notifications.num': 0} } } )
         nots = engine.find({'coll': 'User', 'agg': [{'$match':
             {'username': uname} }, {"$project": {"_id": 0,
-                "notifications.notes": {"$slice": ["$notifications.notes", 25] } }}] })[0]['notifications']['notes']
+                "notifications.notes": {"$slice":
+                    ["$notifications.notes", 25] } }}] })[0]['notifications']['notes']
 
         return json.dumps(nots)
 
@@ -216,7 +221,9 @@ class Change(Resource):
             engine.update({'coll': 'User', 'row': {'username': uname},
                 'update1': { "$inc": { "notifications.num": 1 },
                     "$push": {"notifications.notes": { "$each":
-                        [f"You have successfully changed the price of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
+                        [f"You have successfully changed the price of a {item}\
+                                {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"],
+                        "$position": 0 } } } })
         
         elif option == "location":
             pull, count = None, 0
@@ -229,7 +236,8 @@ class Change(Resource):
                             if it['name'] == change[0]:
                                 pull = it
                                 break
-                    elif item == "equipment" and l['city'] == new_loc[0] and l['sub_city'] == new_loc[1] and l['name'] == new_loc[2]:
+                    elif item == "equipment" and l['city'] == new_loc[0] and
+                    l['sub_city'] == new_loc[1] and l['name'] == new_loc[2]:
                         for it in l['items']:
                             if it['machine'] in change[0]:
                                 count += 1
@@ -253,7 +261,10 @@ class Change(Resource):
                 engine.update({'coll': 'User', 'row': {'username': uname},
                     'update1': { "$inc": { "notifications.num": 1 },
                         "$push": {"notifications.notes": { "$each":
-                            [f"You have successfully changed the location of a {item} {change[0]} from {loc[0]}/{loc[2]}/{loc[1]} to {new_loc[2]}/{new_loc[1]}/{new_loc[0]}"], "$position": 0 } } } })
+                            [f"You have successfully changed the location of a {item}\
+                                    {change[0]} from {loc[0]}/{loc[2]}/{loc[1]} to\
+                                    {new_loc[2]}/{new_loc[1]}/{new_loc[0]}"],
+                            "$position": 0 } } } })
         else:
             change.pop()
             query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname} } ,
@@ -274,7 +285,9 @@ class Change(Resource):
             engine.update({'coll': 'User', 'row': {'username': uname},
                 'update1': { "$inc": { "notifications.num": 1 },
                     "$push": {"notifications.notes": { "$each":
-                        [f"You have successfully changed the visibility of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
+                        [f"You have successfully changed the visibility of a {item}\
+                                {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"],
+                        "$position": 0 } } } })
             
 
          
