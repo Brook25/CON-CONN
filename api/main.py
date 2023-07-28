@@ -27,11 +27,13 @@ class Locations(Resource):
         """
         if item_type == "all":
             print(request.args)
-            e = engine.find({'coll': 'EquipmentSuppliers', 'find': {"username": request.args.get('uname') }, 'fields': {} })
+            e = engine.find({'coll': 'EquipmentSuppliers',
+                'find': {"username": request.args.get('uname') }, 'fields': {} })
             if e:
                 e = e[0]['locations']
             e = [f'{x["name"]}/{x["city"]}/{x["sub_city"]}' for x in e]
-            m = engine.find({'coll': 'MaterialSuppliers', 'find': {"username": request.args.get('uname')}, 'fields': {} })
+            m = engine.find({'coll': 'MaterialSuppliers',
+                'find': {"username": request.args.get('uname')}, 'fields': {} })
             if m:
                 m = m[0]['locations']
             m = [f'{x["name"]}/{x["city"]}/{x["sub_city"]}' for x in m]
@@ -54,8 +56,10 @@ class Items(Resource):
             city = location[1]
             sub_city = location[2]
             coll = 'EquipmentSuppliers' if item_type == 'equipment' else 'MaterialSuppliers'
-            query = engine.find({"coll": coll, "find": {"username": uname}, "fields": {} })[0]['locations']
-            res = [loc for loc in query if loc['name'] == name and loc['city'] == city and loc['sub_city'] == sub_city][0]['items']
+            query = engine.find({"coll": coll, "find": {"username": uname},
+                "fields": {} })[0]['locations']
+            res = [loc for loc in query if loc['name'] == name
+                    and loc['city'] == city and loc['sub_city'] == sub_city][0]['items']
             return json.dumps(res)
         
     def delete(self, item_type):
@@ -68,9 +72,13 @@ class Items(Resource):
         print(data, detail, name, city)
         coll = 'EquipmentSuppliers' if item_type == "equipment" else 'MaterialSuppliers'
         engine.update({'coll': coll, 'row': {"username": data['uname']},
-            'update1': {"$pull": {"locations.$[l].items": {"name": {"$in": data['change'] } } } },
+            'update1': {"$pull": {"locations.$[l].items":
+                {"name": {"$in": data['change'] } } } },
             'array_filters': [{"l.name": name, "l.city": city, "l.sub_city": sub_city}] })
-        engine.update({'coll': 'User', 'row': {'username': data['uname']}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully removed {' '.join(data['change'])} at {name}/{sub_city}/{city}"], "$position": 0 } } } })
+        engine.update({'coll': 'User', 'row': {'username': 
+            data['uname']}, 'update1': { "$inc": { "notifications.num": 1 },
+                "$push": {"notifications.notes": { "$each":
+                    [f"You have successfully removed {' '.join(data['change'])} at {name}/{sub_city}/{city}"], "$position": 0 } } } })
         return json.dumps({"res": 'OK'})
 
     @staticmethod
@@ -119,7 +127,13 @@ class Reviews(Resource):
             req = request.json
             loc = req.get('loc').split('/')
             name = req.get('name')[:-2]
-            reviews = engine.find({'coll': coll, 'agg': [{'$match': {'username': req.get('uname') }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items'].get('reviews')
+            reviews = engine.find({'coll': coll, 'agg': [{'$match':
+                {'username': req.get('uname') }},
+                {"$unwind": "$locations"}, {"$match": {"locations.name":
+                    loc[0], "locations.sub_city": loc[1], "locations.city": 
+                    loc[2] } }, {"$unwind": "$locations.items"},
+                {"$match": {"locations.items.name": name}},
+                {"$project": {'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items'].get('reviews')
             return json.dumps(reviews)
         
         else:
@@ -132,7 +146,13 @@ class Reviews(Resource):
             rev = {"username": current_user, "review": req.get("rev")}
             rat = int(req.get('rating'))
             coll = 'EquipmentSuppliers' if supp[-1][0] == 'e' else 'MaterialSuppliers'
-            rev_rat = engine.find({'coll': coll, 'agg': [{'$match': {'username': supp_name }}, {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1], "locations.city": loc[2] } }, {"$unwind": "$locations.items"}, {"$match": {"locations.items.name": name}}, {"$project": {'locations.items.rating': 1, 'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items']
+            rev_rat = engine.find({'coll': coll, 'agg': [{'$match':
+                {'username': supp_name }}, {"$unwind": "$locations"},
+                {"$match": {"locations.name": loc[0], "locations.sub_city": loc[1],
+                    "locations.city": loc[2] } }, {"$unwind": "$locations.items"},
+                {"$match": {"locations.items.name": name}},
+                {"$project": {'locations.items.rating': 1,
+                    'locations.items.reviews': 1, '_id': 0}} ] })[0]['locations']['items']
             reviews = rev_rat['reviews']
             rating = rev_rat['rating']
             exists = False
@@ -143,7 +163,11 @@ class Reviews(Resource):
             if not exists:
                 rating[0] = round(rating[0], 2)
                 new_rat = [(rating[0] + rat) / (rating[1] + 1), rating[1] + 1]
-                engine.update({'coll': coll, 'row': {'username': supp_name}, 'update1': {"$push": {"locations.$[l].items.$[i].reviews": rev}, "$set": {"locations.$[l].items.$[i].rating": new_rat}}, 'array_filters': [{"l.name": loc[0], "l.city": loc[2], "l.sub_city": loc[1]}, {"i.name": name}] })
+                engine.update({'coll': coll, 'row': {'username': supp_name},
+                    'update1': {"$push": {"locations.$[l].items.$[i].reviews": rev},
+                        "$set": {"locations.$[l].items.$[i].rating": new_rat}},
+                    'array_filters': [{"l.name": loc[0], "l.city": loc[2],
+                        "l.sub_city": loc[1]}, {"i.name": name}] })
                 return 'ok', 200
             return 'Not Done', 200
 
@@ -164,8 +188,11 @@ class Notification(Resource):
     def get(self, notn):
         uname = request.args.get('uname')
         if notn > 0:
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': {'$set': {'notifications.num': 0} } } )
-        nots = engine.find({'coll': 'User', 'agg': [{'$match': {'username': uname} }, {"$project": {"_id": 0, "notifications.notes": {"$slice": ["$notifications.notes", 25] } }}] })[0]['notifications']['notes']
+            engine.update({'coll': 'User', 'row': {'username': uname},
+                'update1': {'$set': {'notifications.num': 0} } } )
+        nots = engine.find({'coll': 'User', 'agg': [{'$match':
+            {'username': uname} }, {"$project": {"_id": 0,
+                "notifications.notes": {"$slice": ["$notifications.notes", 25] } }}] })[0]['notifications']['notes']
 
         return json.dumps(nots)
 
@@ -182,13 +209,20 @@ class Change(Resource):
         coll = 'EquipmentSuppliers' if item == 'equipment' else 'MaterialSuppliers'
         if option == "Price":
             print('hello', loc, change, new_loc,request.form)
-            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": {"locations.$[l].items.$[i].price": int(change[1])}}, "array_filters": [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}, {"i.name": change[0]}] })
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the price of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
+            engine.update({'coll': coll, 'row': {"username": uname}, 'update1':
+                {"$set": {"locations.$[l].items.$[i].price": int(change[1])}},
+                "array_filters": [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]},
+                    {"i.name": change[0]}] })
+            engine.update({'coll': 'User', 'row': {'username': uname},
+                'update1': { "$inc": { "notifications.num": 1 },
+                    "$push": {"notifications.notes": { "$each":
+                        [f"You have successfully changed the price of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
         
         elif option == "location":
             pull, count = None, 0
             if sorted(new_loc) != sorted(loc):
-                query = engine.find({'coll': coll, 'find': {'username': uname}, 'fields': {} })[0]['locations']
+                query = engine.find({'coll': coll, 'find': {'username': uname},
+                    'fields': {} })[0]['locations']
                 for l in query:
                     if l['city'] == loc[1] and l['sub_city'] == loc[2] and l['name'] == loc[0]:
                         for it in l['items']:
@@ -208,21 +242,39 @@ class Change(Resource):
                     pull['name'] = f'{pull["machine"]}{count + 1}'
 
             
-                engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$push": {"locations.$[l].items": pull}}, 'array_filters': [{"l.name": new_loc[2], "l.sub_city": new_loc[1], "l.city": new_loc[0]}] })
+                engine.update({'coll': coll, 'row': {"username": uname},
+                    'update1': {"$push": {"locations.$[l].items": pull}},
+                    'array_filters': [{"l.name": new_loc[2], "l.sub_city": new_loc[1],
+                        "l.city": new_loc[0]}] })
             
                 engine.update({'coll': coll, 'row': {"username": uname},
-            'update1': {"$pull": {"locations.$[l].items": {"name": change[0]}}}, 'array_filters': [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}] })
-                engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the location of a {item} {change[0]} from {loc[0]}/{loc[2]}/{loc[1]} to {new_loc[2]}/{new_loc[1]}/{new_loc[0]}"], "$position": 0 } } } })
+            'update1': {"$pull": {"locations.$[l].items": {"name": change[0]}}}, 
+            'array_filters': [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}] })
+                engine.update({'coll': 'User', 'row': {'username': uname},
+                    'update1': { "$inc": { "notifications.num": 1 },
+                        "$push": {"notifications.notes": { "$each":
+                            [f"You have successfully changed the location of a {item} {change[0]} from {loc[0]}/{loc[2]}/{loc[1]} to {new_loc[2]}/{new_loc[1]}/{new_loc[0]}"], "$position": 0 } } } })
         else:
             change.pop()
-            query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname} } , {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0], "locations.city": loc[1], "locations.sub_city": loc[2]}}, {"$project": {"locations.items": {"$filter": {"input": "$locations.items", "as": "inner_doc", "cond": {"$in": ["$$inner_doc.name", change] } } } } } ] })[0]['locations']['items']
+            query = engine.find({'coll': coll, 'agg': [{"$match": {"username": uname} } ,
+                {"$unwind": "$locations"}, {"$match": {"locations.name": loc[0],
+                    "locations.city": loc[1], "locations.sub_city": loc[2]}},
+                {"$project": {"locations.items": {"$filter":
+                    {"input": "$locations.items", "as": "inner_doc", "cond":
+                        {"$in": ["$$inner_doc.name", change] } } } } } ] })[0]['locations']['items']
             av = dict([[item['name'].lower(), not(item['available'])] for item in query])
             it_names = sorted([item['name'] for item in query])
             update1 = {f"locations.$[l].items.$[{k.replace('-', '').replace(' ', '')}].available":  av[k] for k in sorted(av.keys())}
-            array_filters = [{"l.name": loc[0], "l.sub_city": loc[2], "l.city": loc[1]}]+ [{f"{k.lower().replace('-', '').replace(' ', '')}.name": k} for k in it_names]
-            dct = {'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters}
-            engine.update({'coll': coll, 'row': {"username": uname}, 'update1': {"$set": update1}, 'array_filters': array_filters})
-            engine.update({'coll': 'User', 'row': {'username': uname}, 'update1': { "$inc": { "notifications.num": 1 }, "$push": {"notifications.notes": { "$each": [f"You have successfully changed the visibility of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
+            array_filters = [{"l.name": loc[0], "l.sub_city": loc[2],
+                "l.city": loc[1]}]+ [{f"{k.lower().replace('-', '').replace(' ', '')}.name": k} for k in it_names]
+            dct = {'coll': coll, 'row': {"username": uname}, 'update1':
+                    {"$set": update1}, 'array_filters': array_filters}
+            engine.update({'coll': coll, 'row': {"username": uname},
+                'update1': {"$set": update1}, 'array_filters': array_filters})
+            engine.update({'coll': 'User', 'row': {'username': uname},
+                'update1': { "$inc": { "notifications.num": 1 },
+                    "$push": {"notifications.notes": { "$each":
+                        [f"You have successfully changed the visibility of a {item} {change[0]} at {loc[0]}/{loc[2]}/{loc[1]}"], "$position": 0 } } } })
             
 
          

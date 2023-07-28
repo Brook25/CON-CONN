@@ -172,7 +172,8 @@ class DBEngine:
             else:
                 for city in kwargs.get('place').get('cities'):
                     if city not in places['cities']:
-                        places_equipments.update({'cities': {"$exists": True}}, {"$set": {city: kwargs['place'][city] }})
+                        places_equipments.update({'cities': {"$exists": True}},
+                                {"$set": {city: kwargs['place'][city] }})
                     else:
                         for sub_city in kwargs['place']['cities'][city]:
                             places_equipments.update({'cities':
